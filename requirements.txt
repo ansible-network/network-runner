@@ -1,0 +1,3 @@
+six
+ansible
+ansible-runner

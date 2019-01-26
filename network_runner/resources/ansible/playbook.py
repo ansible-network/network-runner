@@ -25,7 +25,7 @@ from network_runner.resources.attributes import Attribute
 class Task(Entity):
 
     _name = Attribute(serialize='present')
-    _module = Attribute(required=True)
+    _action = Attribute(required=True)
     _args = Attribute(type='dict')
     _vars = Attribute(type='dict')
     _when = Attribute(serialize='present')
@@ -33,7 +33,7 @@ class Task(Entity):
 
     def serialize(self):
         obj = super(Task, self).serialize()
-        mod = obj.pop('module')
+        mod = obj.pop('action')
         args = obj.pop('args', {})
         assert isinstance(args, dict)
         obj[mod] = args
@@ -49,7 +49,7 @@ class Task(Entity):
         assert len(ds) == 1, "unknown key/value in task"
 
         for key, value in iteritems(ds):
-            obj['module'] = key
+            obj['action'] = key
             obj['args'] = value
 
         super(Task, self).deserialize(obj)

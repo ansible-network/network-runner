@@ -38,12 +38,6 @@ class Attribute(object):
         if validator and self.attrtype not in validator.__required_types__:
             raise AttributeError('invalid validator for attr type')
 
-        if not self.default:
-            if self.attrtype == 'list':
-                self.default = []
-            elif self.attrtype == 'dict':
-                self.default = {}
-
         if self.attrtype == 'int':
             self._attr_type = int
         elif self.attrtype == 'bool':

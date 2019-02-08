@@ -62,7 +62,15 @@ class Entity(with_metaclass(EntityMeta)):
             try:
                 attr_value = kwargs[key]
             except KeyError:
-                attr_value = value.default
+                if not value.default:
+                    if value.attrtype == 'dict':
+                        attr_value = {}
+                    elif value.attrtype == 'list':
+                        attr_value = []
+                    else:
+                        attr_value = None
+                else:
+                    attr_value = value.default
 
             if value.cls and not isinstance(attr_value, type(value.cls)):
                 if not isinstance(attr_value, (list, dict)):

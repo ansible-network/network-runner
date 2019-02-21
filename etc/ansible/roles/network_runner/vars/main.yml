@@ -1,1 +1,4 @@
 ---
+# vars required for managing VLANs
+vlan_id: null
+vlan_name: null

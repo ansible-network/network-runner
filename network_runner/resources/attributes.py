@@ -16,6 +16,8 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import unicodedata
+
 from six import PY2
 
 
@@ -59,10 +61,12 @@ class Attribute(object):
                 value = self._attr_type(value)
 
                 if not isinstance(value, self._attr_type):
-                    raise ValueError('invalid attribute type: %s' % value)
+                    raise ValueError('invalid attribute type: {}'.format(
+                        value))
 
             if PY2 and isinstance(value, unicode):
-                value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
+                value = unicodedata.normalize('NFKD', value).encode('ascii',
+                                                                    'ignore')
 
             if self.validator:
                 self.validator(value)

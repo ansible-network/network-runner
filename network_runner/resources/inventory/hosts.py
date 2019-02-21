@@ -23,10 +23,10 @@ from network_runner.resources.attributes import Attribute
 class Host(Entity):
 
     _name = Attribute(required=True, serialize='never')
-    _host = Attribute(serialize='present')
-    _username = Attribute(serialize='present')
-    _password = Attribute(serialize='present')
-    _network_os = Attribute(serialize='present')
+    _ansible_host = Attribute(serialize='present')
+    _ansible_user = Attribute(serialize='present')
+    _ansible_ssh_pass = Attribute(serialize='present')
+    _ansible_network_os = Attribute(serialize='present')
 
     def __init__(self, *args, **kwargs):
         self._vars = dict()
@@ -51,8 +51,6 @@ class Host(Entity):
             obj[key] = ds.pop(key, None)
         super(Host, self).deserialize(obj)
         self._vars.update(ds)
-
-
 
 
 class Hosts(KeyedCollection):

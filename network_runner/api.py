@@ -22,19 +22,27 @@ from network_runner import exceptions
 from network_runner.resources.ansible import Playbook
 from network_runner.resources.inventory import Inventory
 
+class NetworkRunner(object):
+    """Object to invoke ansible_runner to call Ansible Networking
+    Hold inventory and provide an interface for calling
+    roles in Ansible Networking to manipulate switch configuration
+    """
 
-def run(playbook, inventory):
-    assert isinstance(playbook, Playbook)
-    assert isinstance(inventory, Inventory)
+    def __init__(self, inventory):
+        assert isinstance(inventory, Inventory)
+        self.inventory = inventory
 
-    # invoke ansible networking via ansible runner
-    result = ansible_runner.run(playbook=playbook.serialize(),
-                                inventory=inventory.serialize(),
-                                settings={'pexpect_use_poll': False})
+    def run(self, playbook):
+        assert isinstance(playbook, Playbook)
 
-    # check for failure
-    if result.status == 'failed' or \
-            (result.stats and result.stats.get('failures', [])):
-        raise exceptions.AnsibleRunnerException(' '.join(result.stdout))
+        # invoke ansible networking via ansible runner
+        result = ansible_runner.run(playbook=playbook.serialize(),
+                                    inventory=self.inventory.serialize(),
+                                    settings={'pexpect_use_poll': False})
 
-    return result
+        # check for failure
+        if result.status == 'failed' or \
+                (result.stats and result.stats.get('failures', [])):
+            raise exceptions.AnsibleRunnerException(' '.join(result.stdout))
+
+        return result

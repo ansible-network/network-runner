@@ -17,7 +17,6 @@
 # under the License.
 #
 import json
-import unicodedata
 
 from collections import MutableMapping, MutableSequence
 
@@ -84,7 +83,7 @@ class Entity(with_metaclass(EntityMeta)):
 
         for key in required_attrs:
             if getattr(self, key) is None:
-                raise ValueError('missing required attribute: %s' % key)
+                raise ValueError('missing required attribute: {}'.format(key))
 
         super(Entity, self).__init__()
 
@@ -95,7 +94,8 @@ class Entity(with_metaclass(EntityMeta)):
         if key in self._attributes:
             value = self._attributes[key](value)
         elif not key.startswith('_'):
-            raise AttributeError("'%s' object has no attribute '%s'" % (self.__class__.__name__, key))
+            raise AttributeError("'{}' object has no attribute '{}'".format(
+                self.__class__.__name__, key))
         self.__dict__[key] = value
 
     def __delattr__(self, key):
@@ -132,7 +132,8 @@ class Entity(with_metaclass(EntityMeta)):
             if hasattr(value, 'serialize'):
                 obj[key] = value.serialize()
             else:
-                if attr.serialize == 'always' or attr.serialize == 'present' and value is not None:
+                if attr.serialize == 'always' or attr.serialize == 'present' \
+                        and value is not None:
                     obj[key] = value
 
         return obj
@@ -255,7 +256,8 @@ class KeyedCollection(MutableMapping):
             if kwargs[self.__item_key__] in self:
                 raise ValueError('entry already exists')
         except KeyError:
-            raise ValueError('missing required argument: %s' % self.__item_key__)
+            raise ValueError('missing required argument: {}'.format(
+                self.__item_key__))
         obj = self.__item_class__(**kwargs)
         self.add(obj)
         return obj

@@ -113,7 +113,8 @@ class NetworkRunner(object):
                         target device's default VLAN assignment. This
                         default is assigned in the ansible role.
         """
-        play_name='Configure port in access mode using {}'.format(NETWORK_CLI)
+        play_name = 'Configure port in access mode using {}'.format(
+            NETWORK_CLI)
         play = Play(name=play_name,
                     hosts=hostname,
                     connection=NETWORK_CLI,
@@ -145,7 +146,8 @@ class NetworkRunner(object):
         :param trunked_vlans: A list of VLAN IDs to add to the port in
                               addition to the default VLAN.
         """
-        play_name='Configure port in trunk mode using {}'.format(NETWORK_CLI)
+        play_name = 'Configure port in trunk mode using {}'.format(
+            NETWORK_CLI)
         play = Play(name=play_name,
                     hosts=hostname,
                     connection=NETWORK_CLI,
@@ -157,7 +159,7 @@ class NetworkRunner(object):
                           'tasks_from': 'conf_trunk_port'},
                     vars={'vlan_id': vlan_id,
                           'port': port,
-                          'trunked_vlans'=trunked_vlans})
+                          'trunked_vlans': trunked_vlans})
 
         play.tasks.add(task)
 

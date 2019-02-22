@@ -1,0 +1,4 @@
+six
+ansible
+ansible-runner
+flake8

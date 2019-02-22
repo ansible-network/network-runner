@@ -1,0 +1,9 @@
+---
+- name: "dellos10: remove port configuration"
+  dellos10_config:
+    lines: "default interface {{ port_name }}"
+
+- name: "dellos10: administratively disable the port"
+  dellos10_config:
+    lines: "shutdown"
+    parents: ["interface {{ port_name }}"]

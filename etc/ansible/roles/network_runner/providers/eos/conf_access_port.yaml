@@ -1,0 +1,63 @@
+---
+- name: "eos: get current status of the port"
+  eos_command:
+    commands:
+      - "show interface {{ port_name }} switchport | json"
+      - "show interface {{ port_name }} | json"
+      - "show running-config"
+  register: output
+  connection: network_cli
+  become: True
+  become_method: 'enable'
+
+- name: "eos: set port facts"
+  set_fact:
+    switchport: "{{ output.stdout[0].switchports[port_name] }}"
+    interface: "{{ output.stdout[1].interfaces[port_name] }}"
+
+- name: "eos: port is configured as routed"
+  block:
+    - name: "eos: reset interface to defaults"
+      eos_config:
+        lines: "default interface {{ port_name }}"
+
+    - name: "eos: build port configuration"
+      eos_config:
+        lines:
+          - "interface {{ port_name }}"
+          - "description {{ port_description }}"
+          - "switchport access vlan {{ _vlan_id }}"
+          - "no shutdown"
+        parents:
+          - "interface {{ port_name }}"
+        running_config: "{{ output.stdout[2] }}"
+  when: not switchport.enabled
+  connection: network_cli
+  become: True
+  become_method: 'enable'
+
+- name: "eos: port is configured as switchport"
+  block:
+    - name: "eos: set the switchport mode to access"
+      eos_config:
+        lines: "switchport mode access"
+        parents: ["interface {{ port_name }}"]
+      when: switchport.switchportInfo.mode != 'access'
+
+    - name: "eos: configure port settings"
+      eos_config:
+        lines:
+          - "description {{ port_description }}"
+          - "switchport access vlan {{ _vlan_id }}"
+        parents: ["interface {{ port_name }}"]
+        running_config: "{{ output.stdout[2] }}"
+
+    - name: "eos: administratively enable the port"
+      eos_config:
+        lines: "no shutdown"
+        parents: ["interface {{ port_name }}"]
+      when: interface.interfaceStatus == 'disabled'
+  when: switchport.enabled
+  connection: network_cli
+  become: True
+  become_method: 'enable'

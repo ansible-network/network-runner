@@ -1,0 +1,28 @@
+---
+- name: "eos: get interfaces"
+  eos_command:
+    commands: "show interfaces | json"
+  register: output
+  connection: network_cli
+  become: True
+  become_method: 'enable'
+
+- name: "eos: verify port exists"
+  fail:
+    msg: "port {{ port_name }} does not exist on this device"
+  when: port not in output.stdout[0].interfaces | list
+
+- name: "eos: remove port configuration"
+  eos_config:
+    lines: "default interface {{ port_name }}"
+  connection: network_cli
+  become: True
+  become_method: 'enable'
+
+- name: "eos: administratively disable the port"
+  eos_config:
+    lines: "shutdown"
+    parents: ["interface {{ port_name }}"]
+  connection: network_cli
+  become: True
+  become_method: 'enable'

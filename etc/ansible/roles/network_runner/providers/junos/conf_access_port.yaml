@@ -1,0 +1,10 @@
+---
+- name: "junos: configure access port"
+  junos_command:
+    commands:
+      - config
+      - "delete interfaces {{ port_name }}"
+      - "set interfaces {{ port_name }} unit 0 family ethernet-switching interface-mode access"
+      - "set interfaces {{ port_name }} unit 0 family ethernet-switching vlan members {{ _vlan_id }}"
+      - commit
+  connection: network_cli

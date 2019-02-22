@@ -1,0 +1,8 @@
+---
+- name: "junos: delete vlan"
+  junos_command:
+    commands:
+      - config
+      - "delete vlans {{ _vlan_name }}"
+      - commit
+  connection: network_cli

@@ -1,0 +1,8 @@
+---
+- name: "junos: delete port"
+  junos_command:
+    commands:
+      - config
+      - "delete interfaces {{ port_name }}"
+      - commit
+  connection: network_cli

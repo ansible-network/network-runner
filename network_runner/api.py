@@ -102,3 +102,90 @@ class NetworkRunner(object):
         playbook.add(play)
 
         return self.run(playbook)
+
+    def conf_access_port(self, hostname, port, vlan_id):
+        """Configure access port on a vlan.
+
+        :param hostname: The name of the host in Ansible inventory.
+        :param port: The port to configure.
+        :param vlan_id: The vlan_id to assign to the port.
+                        An empty or None value will default to the
+                        target device's default VLAN assignment. This
+                        default is assigned in the ansible role.
+        """
+        play_name='Configure port in access mode using {}'.format(NETWORK_CLI)
+        play = Play(name=play_name,
+                    hosts=hostname,
+                    connection=NETWORK_CLI,
+                    gather_facts=False)
+
+        task = Task(name='Configure port in access mode',
+                    module=IMPORT_ROLE,
+                    args={'name': NETWORK_RUNNER,
+                          'tasks_from': 'conf_access_port'},
+                    vars={'vlan_id': vlan_id,
+                          'port': port})
+
+        play.tasks.add(task)
+
+        playbook = Playbook()
+        playbook.add(play)
+
+        return self.run(playbook)
+
+    def conf_trunk_port(self, hostname, port, vlan_id, trunked_vlans):
+        """Configure trunk port w/ default vlan and optional additional vlans
+
+        :param hostname: The name of the host in Ansible inventory.
+        :param port: The port to configure.
+        :param vlan_id: the default VLAN ID to assign to the port
+                        An empty or None value will default to the
+                        target device's default VLAN assignment. This
+                        default is assigned in the ansible role.
+        :param trunked_vlans: A list of VLAN IDs to add to the port in
+                              addition to the default VLAN.
+        """
+        play_name='Configure port in trunk mode using {}'.format(NETWORK_CLI)
+        play = Play(name=play_name,
+                    hosts=hostname,
+                    connection=NETWORK_CLI,
+                    gather_facts=False)
+
+        task = Task(name='Configure port in trunk mode',
+                    module=IMPORT_ROLE,
+                    args={'name': NETWORK_RUNNER,
+                          'tasks_from': 'conf_trunk_port'},
+                    vars={'vlan_id': vlan_id,
+                          'port': port,
+                          'trunked_vlans'=trunked_vlans})
+
+        play.tasks.add(task)
+
+        playbook = Playbook()
+        playbook.add(play)
+
+        return self.run(playbook)
+
+    def delete_port(self, hostname, port):
+        """Delete port configuration.
+
+        :param hostname: The name of the host in Ansible inventory.
+        :param port: The port to configure.
+        """
+        play = Play(name='Delete port using {}'.format(NETWORK_CLI),
+                    hosts=hostname,
+                    connection=NETWORK_CLI,
+                    gather_facts=False)
+
+        task = Task(name='Delete port',
+                    module=IMPORT_ROLE,
+                    args={'name': NETWORK_RUNNER,
+                          'tasks_from': 'delete_port'},
+                    vars={'port': port})
+
+        play.tasks.add(task)
+
+        playbook = Playbook()
+        playbook.add(play)
+
+        return self.run(playbook)

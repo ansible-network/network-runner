@@ -1,0 +1,9 @@
+---
+- name: "nxos: remove port configuration"
+  nxos_config:
+    lines: "default interface {{ port_name }}"
+
+- name: "nxos: administratively disable the port"
+  nxos_config:
+    lines: "shutdown"
+    parents: ["interface {{ port_name }}"]

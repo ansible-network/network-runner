@@ -1,0 +1,5 @@
+---
+- name: "cumulus: create vlan using nclu"
+  nclu:
+    commands: "add vlan {{ _vlan_id }}"
+    commit: true

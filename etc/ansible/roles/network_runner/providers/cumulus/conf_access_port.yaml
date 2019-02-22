@@ -1,0 +1,14 @@
+---
+- name: "cumulus: configure access port using nclu"
+  block:
+    - name: "cumulus: reset interface to defaults"
+      nclu:
+        commands: "del interface {{ port_name }}"
+        commit: true
+
+    - name: "cumulus: build port configuration"
+      nclu:
+        commands:
+          - "add interface {{ port_name }} bridge access {{ _vlan_id }}"
+          - "del interface {{ port_name }} link down"
+        commit: true

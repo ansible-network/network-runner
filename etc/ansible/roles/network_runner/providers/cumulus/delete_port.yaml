@@ -1,0 +1,24 @@
+---
+- name: "cumulus: get interfaces"
+  nclu:
+    commands: "show interface {{ port_name }} json"
+  register: output
+
+- name: "cumulus: set port facts"
+  set_fact:
+    interface: "{{ output.msg }}"
+
+- name: "cumulus: verify port exists"
+  fail:
+    msg: "port {{ port_name }} does not exist on this device"
+  when: interface.mode == 'NotConfigured'
+
+- name: "cumulus: remove port configuration"
+  nclu:
+    commands: "del interface {{ port_name }}"
+    commit: true
+
+- name: "cumulus: administratively disable the port"
+  nclu:
+    commands: "add interface {{ port_name }} link down"
+    commit: true

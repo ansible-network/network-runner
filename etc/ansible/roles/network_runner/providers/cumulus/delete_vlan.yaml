@@ -1,0 +1,5 @@
+---
+- name: "cumulus: delete vlan using nclu"
+  nclu:
+    commands: 'del vlan {{ _vlan_id }}'
+    commit: true

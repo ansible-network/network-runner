@@ -5,4 +5,8 @@
       - config
       - "delete interfaces {{ port_name }}"
       - commit
+  register: result
+  retries: 10
+  delay: 5
+  until: result.rc is defined and result.rc == 0
   connection: network_cli

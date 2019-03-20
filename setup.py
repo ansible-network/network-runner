@@ -21,7 +21,7 @@ def main():
         long_description = fh.read()
 
     setuptools.setup(
-        name='network_runner',
+        name='network-runner',
         version='0.1.0',
         description='Abstracton and Python API for Ansible Networking',
         author='Ansible',

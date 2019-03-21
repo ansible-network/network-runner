@@ -6,7 +6,7 @@ from glob import glob
 try:
     import setuptools
 except ImportError:
-    print("Network Runner needs setuptools to build.", file=sys.stderr)
+    sys.stderr.write("Network Runner needs setuptools to build.\n")
     sys.exit(1)
 
 

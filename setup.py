@@ -6,7 +6,7 @@ from glob import glob
 try:
     import setuptools
 except ImportError:
-    print("Network Runner needs setuptools to build.", file=sys.stderr)
+    sys.stderr.write("Network Runner needs setuptools to build.\n")
     sys.exit(1)
 
 
@@ -28,7 +28,7 @@ def main():
 
     setuptools.setup(
         name='network-runner',
-        version='0.1.1',
+        version='0.1.2',
         description='Abstracton and Python API for Ansible Networking',
         long_description=long_description,
         author='Ansible',

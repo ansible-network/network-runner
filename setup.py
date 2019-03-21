@@ -1,12 +1,14 @@
 import os
+import sys
 
 from glob import glob
 
 try:
     import setuptools
 except ImportError:
-    print("Network Runner needs setuptools in order to build.", file=sys.stderr)
+    print("Network Runner needs setuptools to build.", file=sys.stderr)
     sys.exit(1)
+
 
 def get_data_files(directory):
     lst = glob(os.path.join(directory, '*'))
@@ -15,21 +17,26 @@ def get_data_files(directory):
     data_files.extend([get_data_files(d) for d in lst if os.path.isdir(d)])
     return data_files
 
+
 def main():
 
     with open("README.rst", "r") as fh:
         long_description = fh.read()
 
+    github = 'https://github.com/ansible-network/network-runner/'
+    github_issues = '{}issues'.format(github)
+
     setuptools.setup(
         name='network-runner',
         version='0.1.1',
         description='Abstracton and Python API for Ansible Networking',
+        long_description=long_description,
         author='Ansible',
         author_email='info@ansible.com',
         url='https://github.com/ansible-network/network-runner/',
         project_urls={
-            'Bug Tracker': 'https://github.com/ansible-network/network-runner/issues',
-            'Source Code': 'https://github.com/ansible-network/network-runner/',
+            'Bug Tracker': github,
+            'Source Code': github_issues,
         },
         license='Apache 2',
         python_requires='>=2.7',
@@ -52,6 +59,7 @@ def main():
         ],
         data_files=get_data_files('/etc/ansible/roles/network_runner'),
     )
+
 
 if __name__ == '__main__':
     main()

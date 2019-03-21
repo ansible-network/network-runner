@@ -38,6 +38,7 @@ invocation in python independant of a running OpenStack deployment.
 API Features
 ------------
 The following matrix indicates which features have been implmented.
+
 +--------------------+-------------+-------+------+-----+---------+----------+
 |                    | openvswitch | junos | nxos | eos | cumulus | dellos10 |
 +--------------------+-------------+-------+------+-----+---------+----------+

@@ -40,7 +40,7 @@ def main():
         },
         license='Apache 2',
         python_requires='>=2.7',
-        packages=['network_runner'],
+        packages=setuptools.find_packages(),
         classifiers=[
             'Environment :: Console',
             'Intended Audience :: Developers',

@@ -1,5 +1,4 @@
 six
-ansible
 ansible-runner
 flake8
 mock

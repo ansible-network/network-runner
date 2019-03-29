@@ -1,3 +1,2 @@
 six
-ansible
 ansible-runner

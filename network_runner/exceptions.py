@@ -18,6 +18,6 @@
 #
 
 
-class AnsibleRunnerException(Exception):
+class NetworkRunnerException(Exception):
     def __init__(self, message):
-        super(AnsibleRunnerException, self).__init__(message)
+        super(NetworkRunnerException, self).__init__(message)

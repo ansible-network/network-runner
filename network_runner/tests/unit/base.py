@@ -16,6 +16,10 @@
 import mock
 import unittest
 
+from network_runner import api
+from network_runner.resources.inventory import Inventory
+
+
 class BaseTestCase(unittest.TestCase):
     test_config_files = []
     parse_config = True
@@ -28,3 +32,10 @@ class BaseTestCase(unittest.TestCase):
 class NetworkRunnerTestCase(BaseTestCase):
     def setUp(self):
         super(NetworkRunnerTestCase, self).setUp()
+
+        self.testhost = 'testhost'
+        self.testport = 'port123'
+        self.testvlan = 37
+
+        inventory = Inventory()
+        self.net_runr = api.NetworkRunner(inventory=inventory)

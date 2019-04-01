@@ -16,4 +16,3 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from network_runner.resources.ansible.playbook import Playbook

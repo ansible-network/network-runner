@@ -27,7 +27,7 @@ execute switch level network configuration.
                   ansible_network_os='junos')
 
       inventory = Inventory()
-      inventory.hosts.add(h)
+      inventory.hosts.add(host)
 
       net_runr = api.NetworkRunner(inventory)
 

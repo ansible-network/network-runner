@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import mock
-
 from network_runner.tests.unit import base
 
 from network_runner.resources.inventory import Inventory
@@ -74,7 +72,7 @@ class TestResourcesAnsiblePlaybook(base.NetworkRunnerTestCase):
         serialized_playbook = playbook.serialize()
         self.assertEqual(serialized_playbook, EMPTY_PLAYBOOK)
 
-        #TODO(radez) why is [] != [] ???
+        # TODO(radez) why is [] != [] ???
         # playbook.deserialize(EMPTY_PLAYBOOK)
         # self.assertEqual(playbook, Playbook())
 
@@ -89,11 +87,11 @@ class TestResourcesAnsiblePlaybook(base.NetworkRunnerTestCase):
         self.assertEqual(play, Play())
 
     def test_noop_task(self):
-        task = Task(action='noop')
+        task = Task(module='noop')
         self.assertEqual(type(task), Task)
 
         serialized_task = task.serialize()
         self.assertEqual(serialized_task, NOOP_TASK)
 
         task.deserialize(NOOP_TASK)
-        self.assertEqual(task, Task(action='noop'))
+        self.assertEqual(task, Task(module='noop'))

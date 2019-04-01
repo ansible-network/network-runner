@@ -50,7 +50,7 @@ class NetworkRunner(object):
         # check for failure
         if result.status == 'failed' or \
                 (result.stats and result.stats.get('failures', [])):
-            raise exceptions.AnsibleRunnerException(' '.join(result.stdout))
+            raise exceptions.NetworkRunnerException(' '.join(result.stdout))
 
         return result
 

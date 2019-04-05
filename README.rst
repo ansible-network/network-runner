@@ -33,7 +33,7 @@ Use Cases
 Any python application could need the ability to communicate with a switch
 to perform a task that network-runner is able to complete. The interaction
 with ansible is designed in a library style that will allow direct import and
-invocation in python independant of a running OpenStack deployment.
+invocation in python independent of a running OpenStack deployment.
 
 API Features
 ------------

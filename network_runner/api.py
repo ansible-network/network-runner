@@ -19,7 +19,7 @@
 import ansible_runner
 
 from network_runner import exceptions
-from network_runner.resources.ansible import Playbook
+from network_runner.resources.ansible.playbook import Playbook
 from network_runner.resources.ansible.playbook import Play
 from network_runner.resources.ansible.playbook import Task
 from network_runner.resources.inventory import Inventory

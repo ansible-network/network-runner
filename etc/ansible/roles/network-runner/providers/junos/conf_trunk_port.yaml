@@ -11,5 +11,5 @@
   register: result
   retries: 10
   delay: 5
-  until: result.rc is defined and result.rc == 0
+  until: result.msg is not defined or result.msg.find(junos_retries_msg) == -1
   connection: network_cli

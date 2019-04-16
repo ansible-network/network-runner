@@ -26,7 +26,6 @@ from network_runner.resources.inventory import Inventory
 
 IMPORT_ROLE = 'import_role'
 NETWORK_RUNNER = 'network-runner'
-NETWORK_CLI = 'network_cli'
 
 
 class NetworkRunner(object):
@@ -61,9 +60,8 @@ class NetworkRunner(object):
         :param vlan_id: The VLAN's ID to create.
         :param vlan_name: The VLAN's name/description.
         """
-        play = Play(name='Create VLAN using {}'.format(NETWORK_CLI),
+        play = Play(name='Create VLAN'),
                     hosts=hostname,
-                    connection=NETWORK_CLI,
                     gather_facts=False)
 
         task = Task(name='Create VLAN',
@@ -85,9 +83,8 @@ class NetworkRunner(object):
         :param hostname: The name of the host in Ansible inventory.
         :param vlan_id: The VLAN's ID to delete.
         """
-        play = Play(name='Delete VLAN using {}'.format(NETWORK_CLI),
+        play = Play(name='Delete VLAN',
                     hosts=hostname,
-                    connection=NETWORK_CLI,
                     gather_facts=False)
 
         task = Task(name='Delete VLAN',
@@ -113,11 +110,9 @@ class NetworkRunner(object):
                         target device's default VLAN assignment. This
                         default is assigned in the ansible role.
         """
-        play_name = 'Configure port in access mode using {}'.format(
-            NETWORK_CLI)
+        play_name = 'Configure port in access mode'
         play = Play(name=play_name,
                     hosts=hostname,
-                    connection=NETWORK_CLI,
                     gather_facts=False)
 
         task = Task(name='Configure port in access mode',
@@ -146,11 +141,9 @@ class NetworkRunner(object):
         :param trunked_vlans: A list of VLAN IDs to add to the port in
                               addition to the default VLAN.
         """
-        play_name = 'Configure port in trunk mode using {}'.format(
-            NETWORK_CLI)
+        play_name = 'Configure port in trunk mode'
         play = Play(name=play_name,
                     hosts=hostname,
-                    connection=NETWORK_CLI,
                     gather_facts=False)
 
         task = Task(name='Configure port in trunk mode',
@@ -174,9 +167,8 @@ class NetworkRunner(object):
         :param hostname: The name of the host in Ansible inventory.
         :param port: The port to configure.
         """
-        play = Play(name='Delete port using {}'.format(NETWORK_CLI),
+        play = Play(name='Delete port',
                     hosts=hostname,
-                    connection=NETWORK_CLI,
                     gather_facts=False)
 
         task = Task(name='Delete port',

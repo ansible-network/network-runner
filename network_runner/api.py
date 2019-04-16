@@ -120,7 +120,8 @@ class NetworkRunner(object):
                     args={'name': NETWORK_RUNNER,
                           'tasks_from': 'conf_access_port'},
                     vars={'vlan_id': vlan_id,
-                          'port': port})
+                          'port_name': port,
+                          'port_description': port})
 
         play.tasks.add(task)
 
@@ -151,7 +152,8 @@ class NetworkRunner(object):
                     args={'name': NETWORK_RUNNER,
                           'tasks_from': 'conf_trunk_port'},
                     vars={'vlan_id': vlan_id,
-                          'port': port,
+                          'port_name': port,
+                          'port_description': port})
                           'trunked_vlans': trunked_vlans})
 
         play.tasks.add(task)
@@ -175,7 +177,7 @@ class NetworkRunner(object):
                     module=IMPORT_ROLE,
                     args={'name': NETWORK_RUNNER,
                           'tasks_from': 'delete_port'},
-                    vars={'port': port})
+                    vars={'port_name': port})
 
         play.tasks.add(task)
 

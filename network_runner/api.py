@@ -60,7 +60,7 @@ class NetworkRunner(object):
         :param vlan_id: The VLAN's ID to create.
         :param vlan_name: The VLAN's name/description.
         """
-        play = Play(name='Create VLAN'),
+        play = Play(name='Create VLAN',
                     hosts=hostname,
                     gather_facts=False)
 
@@ -153,7 +153,7 @@ class NetworkRunner(object):
                           'tasks_from': 'conf_trunk_port'},
                     vars={'vlan_id': vlan_id,
                           'port_name': port,
-                          'port_description': port})
+                          'port_description': port,
                           'trunked_vlans': trunked_vlans})
 
         play.tasks.add(task)

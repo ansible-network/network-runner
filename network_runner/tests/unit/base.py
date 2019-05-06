@@ -36,6 +36,7 @@ class NetworkRunnerTestCase(BaseTestCase):
         self.testhost = 'testhost'
         self.testport = 'port123'
         self.testvlan = 37
+        self.testvlans = [73, 7, 3]
 
         inventory = Inventory()
         self.net_runr = api.NetworkRunner(inventory=inventory)

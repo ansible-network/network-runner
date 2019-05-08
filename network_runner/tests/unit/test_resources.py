@@ -52,6 +52,28 @@ class TestResourcesInventory(base.NetworkRunnerTestCase):
         host.deserialize(TEST_HOST)
         self.assertEqual(host, Host(name='test'))
 
+    def test_host_attrs(self):
+        host = Host(name='test',
+                    ansible_host='testhost',
+                    ansible_user='testuser',
+                    ansible_ssh_pass='testpass',
+                    ansible_network_os='openvswitch')
+
+        self.assertEqual(host.name, 'test')
+        self.assertEqual(host.ansible_host, 'testhost')
+        self.assertEqual(host.ansible_user, 'testuser')
+        self.assertEqual(host.ansible_ssh_pass, 'testpass')
+        self.assertEqual(host.ansible_network_os, 'openvswitch')
+
+    def test_host_vars(self):
+        host = Host(name='test')
+        host['testvar'] = 'testing123'
+        self.assertEqual(host['testvar'], 'testing123')
+
+    def test_host_invalid_ansible_network_os(self):
+        self.assertRaises(AttributeError, Host, name='test',
+                          ansible_network_os='notreal')
+
     def test_empty_child(self):
         child = Child()
         self.assertEqual(type(child), Child)

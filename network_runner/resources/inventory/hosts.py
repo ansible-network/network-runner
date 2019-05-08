@@ -18,6 +18,10 @@
 #
 from network_runner.resources import Entity, KeyedCollection
 from network_runner.resources.attributes import Attribute
+from network_runner.resources.validators import ChoiceValidator
+
+net_os_validator = ChoiceValidator(choices=('cumulus', 'dellos10', 'eos',
+                                            'junos', 'nxos', 'openvswitch'))
 
 
 class Host(Entity):
@@ -26,7 +30,8 @@ class Host(Entity):
     _ansible_host = Attribute(serialize='present')
     _ansible_user = Attribute(serialize='present')
     _ansible_ssh_pass = Attribute(serialize='present')
-    _ansible_network_os = Attribute(serialize='present')
+    _ansible_network_os = Attribute(serialize='present',
+                                    validator=net_os_validator)
 
     def __init__(self, *args, **kwargs):
         self._vars = dict()

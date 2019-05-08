@@ -32,7 +32,8 @@ class ChoiceValidator(BaseValidator):
 
     def __call__(self, value):
         if value not in self.choices:
-            raise AttributeError('invalid choice')
+            msg = '{} is an invalid choice. Possible choices are: {}'
+            raise AttributeError(msg.format(value, self.choices))
 
 
 class RangeValidator(object):

@@ -5,4 +5,4 @@
     record: "{{ port_name }}"
     col: tag
     value: "{{ _vlan_id }}"
-  become: yes
+  become: true

@@ -3,4 +3,3 @@
   dellos10_config:
     lines: "no interface vlan {{ _vlan_id }}"
   connection: network_cli
-

@@ -3,5 +3,5 @@
   eos_config:
     lines: "no vlan {{ _vlan_id }}"
   connection: network_cli
-  become: True
+  become: true
   become_method: 'enable'

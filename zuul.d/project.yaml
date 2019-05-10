@@ -1,0 +1,8 @@
+---
+- project:
+    check:
+      jobs:
+        - network-runner-test-functional-eos
+    gate:
+      jobs:
+        - network-runner-test-functional-eos

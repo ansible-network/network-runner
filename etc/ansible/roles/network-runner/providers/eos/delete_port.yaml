@@ -10,7 +10,7 @@
 - name: "eos: verify port exists"
   fail:
     msg: "port {{ port_name }} does not exist on this device"
-  when: port not in output.stdout[0].interfaces | list
+  when: port_name not in output.stdout[0].interfaces | list
 
 - name: "eos: remove port configuration"
   eos_config:

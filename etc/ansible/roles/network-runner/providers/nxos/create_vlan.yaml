@@ -6,4 +6,3 @@
     parents:
       - "vlan {{ _vlan_id }}"
   connection: network_cli
-

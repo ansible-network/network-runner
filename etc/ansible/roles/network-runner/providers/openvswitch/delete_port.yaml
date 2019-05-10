@@ -5,4 +5,4 @@
     record: "{{ port_name }}"
     col: tag
     value: "[]"
-  become: yes
+  become: true

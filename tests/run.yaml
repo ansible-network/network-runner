@@ -1,0 +1,11 @@
+---
+- hosts: controller
+  tasks:
+    - name: link roles
+      shell: ln -s ~/src/github.com/ansible-network/network-runner/etc/ansible/roles ~/.ansible/roles
+      args:
+        chdir: src/github.com/ansible-network/network-runner
+    - name: execute functional test
+      shell: tox -efunc
+      args:
+        chdir: src/github.com/ansible-network/network-runner

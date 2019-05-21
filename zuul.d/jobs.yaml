@@ -1,0 +1,5 @@
+---
+- job:
+    name: network-runner-test-functional-eos
+    parent: ansible-network-eos-appliance
+    run: tests/run.yaml

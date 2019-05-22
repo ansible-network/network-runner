@@ -3,6 +3,8 @@
     check:
       jobs:
         - network-runner-test-functional-eos
+        - network-runner-test-functional-junos
     gate:
       jobs:
         - network-runner-test-functional-eos
+        - network-runner-test-functional-junos

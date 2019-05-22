@@ -56,7 +56,7 @@ def run_tests(inventory, hostname, port, trunk=False):
     net_runr.conf_access_port(hostname, port, VLAN)
     # ## configure a trunk port
     if trunk:
-        net_runr.conf_trunk_port(hostname, port, vlan, t_vlans)
+        net_runr.conf_trunk_port(hostname, port, VLAN, T_VLANS)
 
     # ## delete a port
     net_runr.delete_port(hostname, port)

@@ -19,10 +19,13 @@
 import ansible_runner
 
 from network_runner import exceptions
+
 from network_runner.resources.ansible.playbook import Playbook
 from network_runner.resources.ansible.playbook import Play
 from network_runner.resources.ansible.playbook import Task
+
 from network_runner.resources.inventory import Inventory
+from network_runner.resources.inventory.hosts import Host
 
 IMPORT_ROLE = 'import_role'
 NETWORK_RUNNER = 'network-runner'
@@ -34,9 +37,24 @@ class NetworkRunner(object):
     roles in Ansible Networking to manipulate switch configuration
     """
 
-    def __init__(self, inventory):
-        assert isinstance(inventory, Inventory)
-        self.inventory = inventory
+    def __init__(self, inventory=None):
+        if inventory is not None:
+            assert isinstance(inventory, Inventory)
+        self.inventory = inventory or Inventory()
+
+    def add_host(self, host):
+        """Add host to inventory
+
+        Adds a new ```Host``` instance to the current inventory
+        object.  The value must be a value ```Host``` instance.
+
+        :param host: A valid instance of ```Host```
+        :type host: network_runner.resources.inventory.hosts.Host
+
+        :returns: None
+        """
+        assert isinstance(host, Host)
+        self.inventory.hosts.add(host)
 
     def run(self, playbook):
         assert isinstance(playbook, Playbook)

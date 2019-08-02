@@ -17,7 +17,25 @@ import mock
 
 from network_runner import exceptions
 from network_runner.resources.ansible import playbook
+from network_runner.resources.inventory.hosts import Host
+from network_runner.api import NetworkRunner
 from network_runner.tests.unit import base
+
+
+class TestAddHost(base.BaseTestCase):
+
+    def test_add_host(self):
+        host = Host(name='test')
+        api = NetworkRunner()
+        assert 'test' not in api.inventory.hosts
+        api.add_host(host)
+        assert 'test' in api.inventory.hosts
+
+    def test_add_host_fail(self):
+        api = NetworkRunner()
+        assert 'test' not in api.inventory.hosts
+        with self.assertRaises(AssertionError):
+            api.add_host(None)
 
 
 class TestCreateDeleteVlan(base.NetworkRunnerTestCase):

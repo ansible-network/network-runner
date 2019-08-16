@@ -11,10 +11,16 @@ except ImportError:
 
 
 def get_data_files(directory):
+    # get directory contents
     lst = glob(os.path.join(directory, '*'))
+    # files list with out dirs in it.
     files = [f for f in lst if os.path.isfile(f)]
+    # build data structure to return [('dir', ['file', 'file'])]
     data_files = [('{}{}'.format(os.sep, directory), files)] if files else []
-    data_files.extend([get_data_files(d) for d in lst if os.path.isdir(d)])
+    # recurse to build data structure for dirs
+    for d in lst:
+        if os.path.isdir(d):
+            data_files.extend(get_data_files(d))
     return data_files
 
 
@@ -57,7 +63,7 @@ def main():
             'Topic :: System :: Systems Administration',
             'Topic :: Utilities',
         ],
-        data_files=get_data_files('/etc/ansible/roles/network_runner'),
+        data_files=get_data_files('etc/ansible/roles/network-runner'),
     )
 
 

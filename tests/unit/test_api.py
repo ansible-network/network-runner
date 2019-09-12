@@ -19,7 +19,8 @@ from network_runner import exceptions
 from network_runner.resources.ansible import playbook
 from network_runner.resources.inventory.hosts import Host
 from network_runner.api import NetworkRunner
-from network_runner.tests.unit import base
+
+from . import base
 
 
 class TestAddHost(base.BaseTestCase):

@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from network_runner.tests.unit import base
+from . import base
 
 from network_runner.resources.inventory import Inventory
 from network_runner.resources.inventory.hosts import Host

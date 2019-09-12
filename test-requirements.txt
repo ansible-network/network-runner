@@ -4,3 +4,4 @@ ansible-runner
 paramiko
 flake8
 mock
+pytest

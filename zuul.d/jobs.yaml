@@ -8,3 +8,8 @@
     name: network-runner-test-functional-junos
     parent: ansible-network-junos-appliance
     run: tests/run.yaml
+
+- job:
+    name: network-runner-test-functional-openvswitch
+    parent: ansible-network-openvswitch-appliance
+    run: tests/run.yaml

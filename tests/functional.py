@@ -12,8 +12,8 @@ PORTS = {
     'openvswitch': 'testport',
     }
 
-HOSTNAME = 'eos-4.20.10'
-HOSTNAME = 'appliance'
+APPLIANCE = 'appliance'
+OPENVSWITCH = 'openvswitch'
 VLAN = 37
 T_VLANS = [3, 7, 73]
 
@@ -70,7 +70,9 @@ def main():
     args = get_parser_args()
     inv_yaml = get_inv_yaml(args)
     hosts = inv_yaml['all']['hosts']
-    hostname = inv_yaml['all']['children'][HOSTNAME]['hosts'].popitem()[0]
+    hostname = inv_yaml['all']['children'][OPENVSWITCH]['hosts'].popitem()[0] \
+        if OPENVSWITCH in inv_yaml['all']['children'] else \
+        inv_yaml['all']['children'][APPLIANCE]['hosts'].popitem()[0]
     net_os = hosts[hostname]['ansible_network_os']
     port = PORTS[net_os]
 

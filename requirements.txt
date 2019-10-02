@@ -2,4 +2,3 @@ six
 ansible
 ansible-runner
 paramiko
-ncclient

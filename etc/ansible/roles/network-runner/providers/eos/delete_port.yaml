@@ -12,17 +12,10 @@
     msg: "port {{ port_name }} does not exist on this device"
   when: port_name not in output.stdout[0].interfaces | list
 
-- name: "eos: remove port configuration"
-  eos_config:
-    lines: "default interface {{ port_name }}"
+- name: "eos: delete the port configuration"
+  cli_config:
+    config: "{{ lookup('template', '{{ role_path }}/templates/eos/delete_port.j2') }}"
+  register: result
   connection: network_cli
   become: true
-  become_method: 'enable'
-
-- name: "eos: administratively disable the port"
-  eos_config:
-    lines: "shutdown"
-    parents: ["interface {{ port_name }}"]
-  connection: network_cli
-  become: true
-  become_method: 'enable'
+  become_method: enable

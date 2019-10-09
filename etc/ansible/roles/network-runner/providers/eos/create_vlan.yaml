@@ -1,10 +1,8 @@
 ---
 - name: "eos: create vlan using network_cli"
-  eos_config:
-    lines:
-      - "name {{ _vlan_name }}"
-    parents:
-      - "vlan {{ _vlan_id }}"
+  cli_config:
+    config: "{{ lookup('template', '{{ role_path }}/templates/eos/create_vlan.j2') }}"
+  register: result
   connection: network_cli
   become: true
-  become_method: 'enable'
+  become_method: enable

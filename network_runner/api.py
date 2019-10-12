@@ -71,6 +71,34 @@ class NetworkRunner(object):
 
         return result
 
+    def play(self, tasks_from, hosts=None, variables=None):
+        """Play a set of tasks from the role
+
+        :param tasks_from: the task to play
+        :type tasks_from: str
+
+        :param hosts: the hosts to execute against
+        :type hosts: str
+
+        :param variables: values to be passed into the play
+        :type variables: dict
+
+        :returns: the results of the playbook run
+        :rtype: AnsibleRunner
+        """
+        task = Task(module=IMPORT_ROLE)
+        task.args = {'name': NETWORK_RUNNER, 'tasks_from': tasks_from}
+        if variables:
+            task.vars = variables
+
+        play = Play(hosts=(hosts or 'all'), gather_facts=False)
+        play.tasks.add(task)
+
+        playbook = Playbook()
+        playbook.add(play)
+
+        return self.run(playbook)
+
     def create_vlan(self, hostname, vlan_id, vlan_name=None):
         """Create VLAN.
 
@@ -78,22 +106,8 @@ class NetworkRunner(object):
         :param vlan_id: The VLAN's ID to create.
         :param vlan_name: The VLAN's name/description.
         """
-        play = Play(name='Create VLAN',
-                    hosts=hostname,
-                    gather_facts=False)
-
-        task = Task(name='Create VLAN',
-                    module=IMPORT_ROLE,
-                    args={'name': NETWORK_RUNNER,
-                          'tasks_from': 'create_vlan'},
-                    vars={'vlan_id': vlan_id})
-
-        play.tasks.add(task)
-
-        playbook = Playbook()
-        playbook.add(play)
-
-        return self.run(playbook)
+        variables = {'vlan_id': vlan_id, 'vlan_name': vlan_name}
+        return self.play('create_vlan', hostname, variables)
 
     def delete_vlan(self, hostname, vlan_id):
         """Delete VLAN.
@@ -101,22 +115,7 @@ class NetworkRunner(object):
         :param hostname: The name of the host in Ansible inventory.
         :param vlan_id: The VLAN's ID to delete.
         """
-        play = Play(name='Delete VLAN',
-                    hosts=hostname,
-                    gather_facts=False)
-
-        task = Task(name='Delete VLAN',
-                    module=IMPORT_ROLE,
-                    args={'name': NETWORK_RUNNER,
-                          'tasks_from': 'delete_vlan'},
-                    vars={'vlan_id': vlan_id})
-
-        play.tasks.add(task)
-
-        playbook = Playbook()
-        playbook.add(play)
-
-        return self.run(playbook)
+        return self.play('delete_vlan', hostname, {'vlan_id': vlan_id})
 
     def conf_access_port(self, hostname, port, vlan_id):
         """Configure access port on a vlan.
@@ -128,25 +127,9 @@ class NetworkRunner(object):
                         target device's default VLAN assignment. This
                         default is assigned in the ansible role.
         """
-        play_name = 'Configure port in access mode'
-        play = Play(name=play_name,
-                    hosts=hostname,
-                    gather_facts=False)
-
-        task = Task(name='Configure port in access mode',
-                    module=IMPORT_ROLE,
-                    args={'name': NETWORK_RUNNER,
-                          'tasks_from': 'conf_access_port'},
-                    vars={'vlan_id': vlan_id,
-                          'port_name': port,
-                          'port_description': port})
-
-        play.tasks.add(task)
-
-        playbook = Playbook()
-        playbook.add(play)
-
-        return self.run(playbook)
+        variables = {'vlan_id': vlan_id, 'port_name': port,
+                     'port_description': port}
+        return self.play('conf_access_port', hostname, variables)
 
     def conf_trunk_port(self, hostname, port, vlan_id, trunked_vlans):
         """Configure trunk port w/ default vlan and optional additional vlans
@@ -160,26 +143,9 @@ class NetworkRunner(object):
         :param trunked_vlans: A list of VLAN IDs to add to the port in
                               addition to the default VLAN.
         """
-        play_name = 'Configure port in trunk mode'
-        play = Play(name=play_name,
-                    hosts=hostname,
-                    gather_facts=False)
-
-        task = Task(name='Configure port in trunk mode',
-                    module=IMPORT_ROLE,
-                    args={'name': NETWORK_RUNNER,
-                          'tasks_from': 'conf_trunk_port'},
-                    vars={'vlan_id': vlan_id,
-                          'port_name': port,
-                          'port_description': port,
-                          'trunked_vlans': trunked_vlans})
-
-        play.tasks.add(task)
-
-        playbook = Playbook()
-        playbook.add(play)
-
-        return self.run(playbook)
+        variables = {'vlan_id': vlan_id, 'port_name': port,
+                     'port_description': port, 'trunked_vlans': trunked_vlans}
+        return self.play('conf_trunk_port', hostname, variables)
 
     def delete_port(self, hostname, port):
         """Delete port configuration.
@@ -187,19 +153,4 @@ class NetworkRunner(object):
         :param hostname: The name of the host in Ansible inventory.
         :param port: The port to configure.
         """
-        play = Play(name='Delete port',
-                    hosts=hostname,
-                    gather_facts=False)
-
-        task = Task(name='Delete port',
-                    module=IMPORT_ROLE,
-                    args={'name': NETWORK_RUNNER,
-                          'tasks_from': 'delete_port'},
-                    vars={'port_name': port})
-
-        play.tasks.add(task)
-
-        playbook = Playbook()
-        playbook.add(play)
-
-        return self.run(playbook)
+        return self.play('delete_port', hostname, {'port_name': port})

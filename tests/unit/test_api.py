@@ -77,6 +77,17 @@ class TestRun(base.NetworkRunnerTestCase):
                           playbook.Playbook())
 
 
+@mock.patch('network_runner.api.ansible_runner')
+class TestPlay(base.NetworkRunnerTestCase):
+
+    def test_play(self, m_ans_runner):
+        m_result = m_ans_runner.run.return_value
+        m_result.stats = {'failures': []}
+
+        self.net_runr.play('create_vlan')
+        m_ans_runner.run.assert_called_once()
+
+
 @mock.patch('network_runner.api.NetworkRunner.run')
 class TestConfAccessPort(base.NetworkRunnerTestCase):
 

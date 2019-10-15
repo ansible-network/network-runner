@@ -1,3 +1,15 @@
 ---
-- fail:
-    msg: Trunk port configuration is not implimented for cumulus
+- name: "cumulus: configure trunk port using nclu"
+  block:
+    - name: "cumulus: reset interface to defaults"
+      nclu:
+        commands: "del interface {{ port_name }}"
+        commit: true
+
+    - name: "cumulus: build port configuration"
+      nclu:
+        commands:
+          - "add interface {{ port_name }}"
+          - "add bridge bridge ports {{ port_name }}"
+          - "del interface {{ port_name }} link down"
+        commit: true

@@ -50,5 +50,5 @@ The following matrix indicates which features have been implmented.
 +--------------------+-------------+-------+------+-----+---------+----------+
 | Config Access Port |      Y      |   Y   |  Y   |  Y  |    Y    |    Y     |
 +--------------------+-------------+-------+------+-----+---------+----------+
-| Config Trunk Port  |      N      |   Y   |  N   |  Y  |    N    |    N     |
+| Config Trunk Port  |      N      |   Y   |  N   |  Y  |    Y    |    N     |
 +--------------------+-------------+-------+------+-----+---------+----------+

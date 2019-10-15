@@ -4,8 +4,9 @@ import json
 from network_runner import api
 from network_runner.resources.inventory import Inventory
 
-TRUNK_SUPPORT = ('junos', 'openvswitch', 'eos')
+TRUNK_SUPPORT = ('cumulus', 'eos', 'junos', 'openvswitch')
 PORTS = {
+    'cumulus': 'swp1',
     'eos': 'Ethernet1',
     'junos': 'xe-0/0/1',
     'openvswitch': 'testport',

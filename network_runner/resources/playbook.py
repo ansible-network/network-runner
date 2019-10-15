@@ -18,33 +18,40 @@
 #
 from six import iteritems
 
-from network_runner.resources import Entity, Collection
-from network_runner.resources.attributes import Attribute
+from network_runner.types.objects import Object
+from network_runner.types.attrs import Attribute
+from network_runner.types.attrs import Container
+from network_runner.types.containers import Index
+
+from network_runner.types.attrs import SERIALIZE_WHEN_PRESENT
 
 
-class Task(Entity):
+class Base(object):
 
-    _name = Attribute(serialize='present')
+    _connection = Attribute(serialize_when=SERIALIZE_WHEN_PRESENT)
+
+
+class Task(Base, Object):
+
+    _name = Attribute(serialize_when=SERIALIZE_WHEN_PRESENT)
     _module = Attribute(required=True)
     _args = Attribute(type='dict')
-    _vars = Attribute(type='dict')
-    _when = Attribute(serialize='present')
-    _connection = Attribute(serialize='present')
+    _vars = Attribute(type='dict', serialize_when=SERIALIZE_WHEN_PRESENT)
+    _when = Attribute(serialize_when=SERIALIZE_WHEN_PRESENT)
 
     def serialize(self):
         obj = super(Task, self).serialize()
-        mod = obj.pop('module')
-        args = obj.pop('args', {})
-        assert isinstance(args, dict)
-        obj[mod] = args
+        module = obj.pop('module')
+        args = obj.pop('args')
+        obj[module] = args
         return obj
 
     def deserialize(self, ds):
         obj = {}
-        for key in self._attributes:
-            if key in ds:
-                value = ds.pop(key)
-                obj[key] = value
+        for name in self._attr_names:
+            if name in ds:
+                value = ds.pop(name)
+                obj[name] = value
 
         assert len(ds) == 1, "unknown key/value in task"
 
@@ -55,20 +62,28 @@ class Task(Entity):
         super(Task, self).deserialize(obj)
 
 
-class Tasks(Collection):
+class Play(Base, Object):
 
-    __item_class__ = Task
+    _name = Attribute(
+        serialize_when=SERIALIZE_WHEN_PRESENT
+    )
+
+    _hosts = Attribute(
+        default='all'
+    )
+
+    _gather_facts = Attribute(
+        type='bool',
+        serialize_when=SERIALIZE_WHEN_PRESENT
+    )
+
+    _tasks = Container(
+        type='index',
+        cls=Task
+    )
 
 
-class Play(Entity):
+class Playbook(Index):
 
-    _name = Attribute(serialize='present')
-    _hosts = Attribute(default='all')
-    _gather_facts = Attribute(type='bool', serialize='present')
-    _connection = Attribute(serialize='present')
-    _tasks = Attribute(cls=Tasks)
-
-
-class Playbook(Collection):
-
-    __item_class__ = Play
+    def __init__(self):
+        super(Playbook, self).__init__(Play)

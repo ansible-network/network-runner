@@ -16,8 +16,8 @@
 import mock
 
 from network_runner import exceptions
-from network_runner.resources.ansible import playbook
-from network_runner.resources.inventory.hosts import Host
+from network_runner.resources import playbook
+from network_runner.resources.inventory import Host
 from network_runner.api import NetworkRunner
 
 from . import base

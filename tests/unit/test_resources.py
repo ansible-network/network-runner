@@ -16,11 +16,11 @@
 from . import base
 
 from network_runner.resources.inventory import Inventory
-from network_runner.resources.inventory.hosts import Host
-from network_runner.resources.inventory.children import Child
-from network_runner.resources.ansible.playbook import Playbook
-from network_runner.resources.ansible.playbook import Play
-from network_runner.resources.ansible.playbook import Task
+from network_runner.resources.inventory import Host
+from network_runner.resources.inventory import Child
+from network_runner.resources.playbook import Playbook
+from network_runner.resources.playbook import Play
+from network_runner.resources.playbook import Task
 
 EMPTY_INV = {'all': {'hosts': {}, 'vars': {}, 'children': {}}}
 TEST_HOST = {'name': 'test'}
@@ -56,19 +56,19 @@ class TestResourcesInventory(base.NetworkRunnerTestCase):
         host = Host(name='test',
                     ansible_host='testhost',
                     ansible_user='testuser',
-                    ansible_ssh_pass='testpass',
+                    ansible_password='testpass',
                     ansible_network_os='openvswitch')
 
         self.assertEqual(host.name, 'test')
         self.assertEqual(host.ansible_host, 'testhost')
         self.assertEqual(host.ansible_user, 'testuser')
-        self.assertEqual(host.ansible_ssh_pass, 'testpass')
+        self.assertEqual(host.ansible_password, 'testpass')
         self.assertEqual(host.ansible_network_os, 'openvswitch')
 
     def test_host_vars(self):
         host = Host(name='test')
-        host['testvar'] = 'testing123'
-        self.assertEqual(host['testvar'], 'testing123')
+        host.vars['testvar'] = 'testing123'
+        self.assertEqual(host.vars['testvar'], 'testing123')
 
     def test_host_invalid_ansible_network_os(self):
         self.assertRaises(AttributeError, Host, name='test',
@@ -95,8 +95,8 @@ class TestResourcesAnsiblePlaybook(base.NetworkRunnerTestCase):
         self.assertEqual(serialized_playbook, EMPTY_PLAYBOOK)
 
         # TODO(radez) why is [] != [] ???
-        # playbook.deserialize(EMPTY_PLAYBOOK)
-        # self.assertEqual(playbook, Playbook())
+        playbook.deserialize(EMPTY_PLAYBOOK)
+        self.assertEqual(playbook, Playbook())
 
     def test_empty_play(self):
         play = Play()

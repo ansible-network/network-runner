@@ -44,14 +44,13 @@ _ATTR_NAME_TO_TYPE = {
 class Attribute(object):
 
     def __init__(self, default=None, type='str', required=None,
-                 validator=None, serialize_when=None, aliases=None):
+                 validator=None, serialize_when=None):
 
         self.required = required
         self.attrtype = type
         self.default = None
         self.validator = validator
         self.serialize_when = serialize_when or SERIALIZE_WHEN_ALWAYS
-        self.aliases = aliases or []
 
         if validator and self.attrtype not in validator.__required_types__:
             raise AttributeError('invalid validator for attr type')

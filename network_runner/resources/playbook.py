@@ -28,16 +28,31 @@ from network_runner.types.attrs import SERIALIZE_WHEN_PRESENT
 
 class Base(object):
 
-    _connection = Attribute(serialize_when=SERIALIZE_WHEN_PRESENT)
+    connection = Attribute(serialize_when=SERIALIZE_WHEN_PRESENT)
 
 
 class Task(Base, Object):
 
-    _name = Attribute(serialize_when=SERIALIZE_WHEN_PRESENT)
-    _module = Attribute(required=True)
-    _args = Attribute(type='dict')
-    _vars = Attribute(type='dict', serialize_when=SERIALIZE_WHEN_PRESENT)
-    _when = Attribute(serialize_when=SERIALIZE_WHEN_PRESENT)
+    name = Attribute(
+        serialize_when=SERIALIZE_WHEN_PRESENT
+    )
+
+    module = Attribute(
+        required=True
+    )
+
+    args = Attribute(
+        type='dict'
+    )
+
+    vars = Attribute(
+        type='dict',
+        serialize_when=SERIALIZE_WHEN_PRESENT
+    )
+
+    when = Attribute(
+        serialize_when=SERIALIZE_WHEN_PRESENT
+    )
 
     def serialize(self):
         obj = super(Task, self).serialize()
@@ -48,7 +63,7 @@ class Task(Base, Object):
 
     def deserialize(self, ds):
         obj = {}
-        for name in self._attr_names:
+        for name in self._attributes:
             if name in ds:
                 value = ds.pop(name)
                 obj[name] = value
@@ -64,20 +79,20 @@ class Task(Base, Object):
 
 class Play(Base, Object):
 
-    _name = Attribute(
+    name = Attribute(
         serialize_when=SERIALIZE_WHEN_PRESENT
     )
 
-    _hosts = Attribute(
+    hosts = Attribute(
         default='all'
     )
 
-    _gather_facts = Attribute(
+    gather_facts = Attribute(
         type='bool',
         serialize_when=SERIALIZE_WHEN_PRESENT
     )
 
-    _tasks = Container(
+    tasks = Container(
         type='index',
         cls=Task
     )

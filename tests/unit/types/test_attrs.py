@@ -20,10 +20,15 @@ from network_runner.types.attrs import Attribute
 from network_runner.types.attrs import Container
 from network_runner.types.containers import Map
 from network_runner.types.containers import Index
+from network_runner.types.validators import ChoiceValidator
 
 
 class Item(Object):
-    _name = Attribute()
+    name = Attribute()
+
+
+class TestIndex(Object):
+    name = Attribute()
 
 
 def test_create_attribute_defaults():
@@ -121,3 +126,29 @@ def test_attr_map():
     assert attrs._ATTR_NAME_TO_TYPE['str'] is str
     assert attrs._ATTR_NAME_TO_TYPE[None] is str
     assert len(attrs._ATTR_NAME_TO_TYPE) == 8
+
+
+def test_bad_validator():
+    with pytest.raises(AttributeError):
+        Attribute(type='int', validator=ChoiceValidator([1, 2, 3]))
+
+
+def test_bad_serialize_when_value():
+    with pytest.raises(ValueError):
+        Attribute(serialize_when=3)
+
+
+def test_bad_value_type():
+    with pytest.raises(TypeError):
+        item = Item()
+        item.name = 1
+
+
+def test_map_container_missing_item_key():
+    with pytest.raises(ValueError):
+        Container(type='map', cls=None)
+
+
+def test_invalid_container_type():
+    with pytest.raises(AssertionError):
+        Container(type='invalid', cls=None)

@@ -29,15 +29,14 @@ from network_runner.helpers import isvalidattrname
 class BaseMeta(type):
 
     def __new__(cls, name, parents, dct):
-        dct['_attr_names'] = set()
+        dct['_attributes'] = {}
 
         def _create_attrs(attr_dct):
             for attr_name in attr_dct:
-                value = attr_dct[attr_name]
-                if isinstance(value, Attribute):
-                    name = attr_name[1:]
-                    isvalidattrname(name)
-                    dct['_attr_names'].add(name)
+                attr = attr_dct[attr_name]
+                if isinstance(attr, Attribute):
+                    isvalidattrname(attr_name)
+                    dct['_attributes'][attr_name] = attr
 
         # process parents first to allow more specific overrides
         for parent in parents:
@@ -45,23 +44,21 @@ class BaseMeta(type):
 
         _create_attrs(dct)
 
-        dct['_attr_names'] = frozenset(dct['_attr_names'])
-
         return super(BaseMeta, cls).__new__(cls, name, parents, dct)
 
 
 class Object(with_metaclass(BaseMeta)):
 
     def __init__(self, **kwargs):
-        for item in self._attr_names:
+        for item in self._attributes:
             setattr(self, item, kwargs.get(item))
 
     def __repr__(self):
         return json.dumps(self.serialize())
 
     def __setattr__(self, key, value):
-        if key in self._attr_names:
-            value = getattr(self, '_{}'.format(key))(value)
+        if key in self._attributes:
+            value = self._attributes[key](value)
 
         elif key in dir(self):
             attr = getattr(self, key)
@@ -75,7 +72,7 @@ class Object(with_metaclass(BaseMeta)):
         self.__dict__[key] = value
 
     def __delattr__(self, key):
-        attr = getattr(self, '_{}'.format(key), None)
+        attr = self._attributes.get(key)
 
         if attr and attr.required is True:
             raise ValueError('required attributes cannot be deleted')
@@ -103,8 +100,7 @@ class Object(with_metaclass(BaseMeta)):
 
     def __getstate__(self):
         obj = {}
-        for item in self._attr_names:
-            attr = getattr(self, '_{}'.format(item))
+        for item, attr in iteritems(self._attributes):
             value = getattr(self, item)
 
             if value is not None and \

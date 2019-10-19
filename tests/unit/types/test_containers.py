@@ -20,12 +20,12 @@ from network_runner.types.containers import Index, Map
 
 
 class ListItem(Object):
-    _name = Attribute()
+    name = Attribute()
 
 
 class DictItem(Object):
-    _name = Attribute()
-    _value = Attribute()
+    name = Attribute()
+    value = Attribute()
 
 
 def test_index():

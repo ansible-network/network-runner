@@ -19,26 +19,26 @@ from network_runner.types.attrs import Attribute
 
 
 class Instance(Object):
-    _name = Attribute()
-    _strattr = Attribute(type='str')
-    _intattr = Attribute(type='int')
-    _boolattr = Attribute(type='bool')
-    _listattr = Attribute(type='list')
-    _dictattr = Attribute(type='dict')
+    name = Attribute()
+    strattr = Attribute(type='str')
+    intattr = Attribute(type='int')
+    boolattr = Attribute(type='bool')
+    listattr = Attribute(type='list')
+    dictattr = Attribute(type='dict')
 
 
 class InstanceWithDefaults(Object):
-    _name = Attribute()
-    _strattr = Attribute(type='str', default='string')
-    _intattr = Attribute(type='int', default=0)
-    _boolattr = Attribute(type='bool', default=False)
-    _listattr = Attribute(type='list', default=[1, 2, 3])
-    _dictattr = Attribute(type='dict',
-                          default={'one': 1, 'two': 2, 'three': 3})
+    name = Attribute()
+    strattr = Attribute(type='str', default='string')
+    intattr = Attribute(type='int', default=0)
+    boolattr = Attribute(type='bool', default=False)
+    listattr = Attribute(type='list', default=[1, 2, 3])
+    dictattr = Attribute(type='dict',
+                         default={'one': 1, 'two': 2, 'three': 3})
 
 
 class InstanceWithRequiredAttr(Object):
-    _required = Attribute(type='str', required=True)
+    required = Attribute(type='str', required=True)
 
 
 def test_set_strattr():

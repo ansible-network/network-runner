@@ -31,29 +31,29 @@ NETWORK_OS_VALIDATOR = ChoiceValidator(
 
 class Host(Object):
 
-    _name = Attribute(
+    name = Attribute(
         required=True,
         serialize_when=SERIALIZE_WHEN_NEVER
     )
 
-    _ansible_host = Attribute(
+    ansible_host = Attribute(
         serialize_when=SERIALIZE_WHEN_PRESENT
     )
 
-    _ansible_user = Attribute(
+    ansible_user = Attribute(
         serialize_when=SERIALIZE_WHEN_PRESENT
     )
 
-    _ansible_password = Attribute(
+    ansible_password = Attribute(
         serialize_when=SERIALIZE_WHEN_PRESENT
     )
 
-    _ansible_network_os = Attribute(
+    ansible_network_os = Attribute(
         serialize_when=SERIALIZE_WHEN_PRESENT,
         validator=NETWORK_OS_VALIDATOR
     )
 
-    _vars = Attribute(
+    vars = Attribute(
         type='dict',
         serialize_when=SERIALIZE_WHEN_NEVER
     )
@@ -67,7 +67,7 @@ class Host(Object):
     def deserialize(self, ds):
         assert isinstance(ds, dict)
         obj = {}
-        for name in self._attr_names:
+        for name in self._attributes:
             obj[name] = ds.pop(name, None)
         super(Host, self).deserialize(obj)
         self.vars.update(ds)
@@ -75,16 +75,38 @@ class Host(Object):
 
 class Child(Object):
 
-    _name = Attribute(serialize_when=SERIALIZE_WHEN_NEVER)
-    _hosts = Container(type='map', cls=Host, key='name')
-    _vars = Attribute(type='dict')
+    name = Attribute(
+        serialize_when=SERIALIZE_WHEN_NEVER
+    )
+
+    hosts = Container(
+        type='map',
+        cls=Host,
+        item_key='name'
+    )
+
+    vars = Attribute(
+        type='dict'
+    )
 
 
 class Inventory(Object):
 
-    _hosts = Container(type='map', cls=Host, key='name')
-    _children = Container(type='map', cls=Child, key='name')
-    _vars = Attribute(type='dict')
+    hosts = Container(
+        type='map',
+        cls=Host,
+        item_key='name'
+    )
+
+    children = Container(
+        type='map',
+        cls=Child,
+        item_key='name'
+    )
+
+    vars = Attribute(
+        type='dict'
+    )
 
     def serialize(self):
         obj = super(Inventory, self).serialize()

@@ -82,18 +82,16 @@ class Attribute(object):
             if self.attrtype == 'bool' and not isinstance(value, bool):
                 raise TypeError('expected type bool')
 
+            if PY2 and isinstance(value, unicode):
+                value = normalize('NFKD', value).encode('ascii', 'ignore')
+
             if not isinstance(value, self._attr_type):
                 raise TypeError(
-                    "attribute must be of type '{}'".format(self.attrtype)
+                    "attribute must be of type '{}', "
+                    "got '{}'".format(self.attrtype, type(value))
                 )
 
             value = self._attr_type(value)
-
-            if not isinstance(value, self._attr_type):
-                raise ValueError('invalid attribute type: {}'.format(value))
-
-            if PY2 and isinstance(value, unicode):
-                value = normalize('NFKD', value).encode('ascii', 'ignore')
 
             if self.validator:
                 self.validator(value)
@@ -114,25 +112,22 @@ class Attribute(object):
 
 class Container(Attribute):
 
-    def __init__(self, type, cls, key=None):
-        self.key = key
+    def __init__(self, type, cls, item_key=None):
+        self.item_key = item_key
         self.cls = cls
 
         assert type in ('map', 'index'), "invalid container type"
 
-        if type == 'map' and key is None:
+        if type == 'map' and item_key is None:
             raise ValueError("missing required args 'key' for type 'map'")
 
         super(Container, self).__init__(type=type)
 
     def __call__(self, value=None):
         if self.attrtype == 'map':
-            value = Map(self.cls, self.key)
+            value = Map(self.cls, self.item_key)
 
         elif self.attrtype == 'index':
             value = Index(self.cls)
-
-        if value:
-            value.deserialize(value)
 
         return value

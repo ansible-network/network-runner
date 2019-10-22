@@ -27,10 +27,6 @@ class Item(Object):
     name = Attribute()
 
 
-class TestIndex(Object):
-    name = Attribute()
-
-
 def test_create_attribute_defaults():
     a = Attribute()
     assert a.required is None

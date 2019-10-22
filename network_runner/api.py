@@ -87,7 +87,7 @@ class NetworkRunner(object):
         pb = Playbook()
         play = pb.new(hosts=(hosts or 'all'), gather_facts=False)
 
-        task = play.tasks.new(module=IMPORT_ROLE)
+        task = play.tasks.new(action=IMPORT_ROLE)
         task.args = {'name': NETWORK_RUNNER, 'tasks_from': tasks_from}
         if variables:
             task.vars = variables

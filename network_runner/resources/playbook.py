@@ -16,8 +16,6 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from six import iteritems
-
 from network_runner.types.objects import Object
 from network_runner.types.attrs import Attribute
 from network_runner.types.attrs import Container
@@ -37,7 +35,7 @@ class Task(Base, Object):
         serialize_when=SERIALIZE_WHEN_PRESENT
     )
 
-    module = Attribute(
+    action = Attribute(
         required=True
     )
 
@@ -53,28 +51,6 @@ class Task(Base, Object):
     when = Attribute(
         serialize_when=SERIALIZE_WHEN_PRESENT
     )
-
-    def serialize(self):
-        obj = super(Task, self).serialize()
-        module = obj.pop('module')
-        args = obj.pop('args')
-        obj[module] = args
-        return obj
-
-    def deserialize(self, ds):
-        obj = {}
-        for name in self._attributes:
-            if name in ds:
-                value = ds.pop(name)
-                obj[name] = value
-
-        assert len(ds) == 1, "unknown key/value in task"
-
-        for key, value in iteritems(ds):
-            obj['module'] = key
-            obj['args'] = value
-
-        super(Task, self).deserialize(obj)
 
 
 class Play(Base, Object):

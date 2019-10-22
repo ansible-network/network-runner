@@ -103,9 +103,18 @@ class Object(with_metaclass(BaseMeta)):
         for item, attr in iteritems(self._attributes):
             value = getattr(self, item)
 
-            if value is not None and \
-               attr.serialize_when < SERIALIZE_WHEN_NEVER or \
-               attr.serialize_when == SERIALIZE_WHEN_ALWAYS:
+            if attr.attrtype in ('dict', 'list'):
+                if value and attr.serialize_when != SERIALIZE_WHEN_NEVER or \
+                    attr.serialize_when == SERIALIZE_WHEN_ALWAYS:
+
+                    if hasattr(value, 'serialize'):
+                        obj[item] = value.serialize()
+                    else:
+                        obj[item] = value
+
+            elif value is not None and \
+                attr.serialize_when < SERIALIZE_WHEN_NEVER:
+
                 if hasattr(value, 'serialize'):
                     obj[item] = value.serialize()
                 else:
@@ -118,7 +127,7 @@ class Object(with_metaclass(BaseMeta)):
     def __setstate__(self, ds):
         assert isinstance(ds, dict), "argument must be of type 'dict'"
         for key, value in iteritems(ds):
-            attr = getattr(self, key)
+            attr = self._attributes[key]
             if hasattr(attr, 'deserialize'):
                 attr.deserialize(value)
             else:

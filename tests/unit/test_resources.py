@@ -27,7 +27,7 @@ TEST_HOST = {'name': 'test'}
 EMPTY_CHILD = {'hosts': {}, 'vars': {}}
 EMPTY_PLAYBOOK = []
 EMPTY_PLAY = {'hosts': 'all', 'tasks': []}
-NOOP_TASK = {'noop': {}, 'vars': {}}
+NOOP_TASK = {'action': 'noop', 'args': {}}
 
 
 class TestResourcesInventory(base.NetworkRunnerTestCase):
@@ -109,11 +109,21 @@ class TestResourcesAnsiblePlaybook(base.NetworkRunnerTestCase):
         self.assertEqual(play, Play())
 
     def test_noop_task(self):
-        task = Task(module='noop')
+        task = Task(action='noop')
         self.assertEqual(type(task), Task)
 
         serialized_task = task.serialize()
         self.assertEqual(serialized_task, NOOP_TASK)
 
         task.deserialize(NOOP_TASK)
-        self.assertEqual(task, Task(module='noop'))
+        self.assertEqual(task, Task(action='noop'))
+
+
+def test_serialize_deserialize():
+    pb = Playbook()
+    p = pb.new()
+    p.tasks.new(action='noop', args={'foo': 'bar'})
+    ds = pb.serialize()
+    newpb = Playbook()
+    newpb.deserialize(ds)
+    assert pb.serialize() == newpb.serialize()

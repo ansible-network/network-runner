@@ -125,9 +125,12 @@ class Container(Attribute):
 
     def __call__(self, value=None):
         if self.attrtype == 'map':
-            value = Map(self.cls, self.item_key)
+            obj = Map(self.cls, self.item_key)
 
         elif self.attrtype == 'index':
-            value = Index(self.cls)
+            obj = Index(self.cls)
 
-        return value
+        if value:
+            obj.deserialize(value)
+
+        return obj

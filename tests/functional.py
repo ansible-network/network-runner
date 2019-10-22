@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 
 from network_runner import api
 from network_runner.resources.inventory import Inventory
@@ -16,12 +17,13 @@ HOSTNAME = 'eos-4.20.10'
 HOSTNAME = 'appliance'
 VLAN = 37
 T_VLANS = [3, 7, 73]
+INVENTORY_FILE = os.getenv('ANSIBLE_INVENTORY_FILE', '/etc/ansible/hosts')
 
 
 def get_parser_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--hosts', help='hosts file',
-                        default='/etc/ansible/hosts')
+                        default=INVENTORY_FILE)
     return parser.parse_args()
 
 
@@ -48,6 +50,7 @@ def get_inv_yaml(args):
 
 def run_tests(inventory, hostname, port, trunk=False):
     # TODO(radez) Use a testing framework to verify
+
 
     net_runr = api.NetworkRunner(inventory)
     # ## Create a vlan

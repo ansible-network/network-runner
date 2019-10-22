@@ -51,7 +51,6 @@ def get_inv_yaml(args):
 def run_tests(inventory, hostname, port, trunk=False):
     # TODO(radez) Use a testing framework to verify
 
-
     net_runr = api.NetworkRunner(inventory)
     # ## Create a vlan
     net_runr.create_vlan(hostname, VLAN)

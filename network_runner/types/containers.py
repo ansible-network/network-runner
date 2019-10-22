@@ -140,6 +140,8 @@ class Map(MutableMapping):
     def __setstate__(self, ds):
         assert isinstance(ds, dict)
         for key, value in iteritems(ds):
+            if not value:
+                value = {}
             value[self.key] = key
             self.new(**value)
 
@@ -153,6 +155,5 @@ class Map(MutableMapping):
             else:
                 obj[key] = value
         return obj
-        return dict([(k, v.deserialize()) for k, v in iteritems(self.objects)])
 
     serialize = __getstate__

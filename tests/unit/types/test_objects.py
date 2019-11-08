@@ -41,6 +41,18 @@ class InstanceWithRequiredAttr(Object):
     required = Attribute(type='str', required=True)
 
 
+def test_instance():
+    o = Instance()
+    assert repr(o) is not None
+
+    z = Instance()
+    assert o.__eq__(z)
+    assert o.__cmp__(z)
+
+    z.name = 'test'
+    assert o.__neq__(z)
+
+
 def test_set_strattr():
     o = Instance()
     o.strattr = 'test'
@@ -196,6 +208,10 @@ def test_object_init_with_values():
 def test_object_with_required_attr():
     o = InstanceWithRequiredAttr(required='foo')
     assert o.required == 'foo'
+
+    with pytest.raises(ValueError):
+        del o.required
+
     with pytest.raises(ValueError):
         InstanceWithRequiredAttr()
 

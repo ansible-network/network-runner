@@ -128,12 +128,6 @@ class Object(with_metaclass(BaseMeta)):
     def __cmp__(self, other):
         return self.__eq__(other)
 
-    def __hash__(self):
-        return hash(self.serialize())
-
-    def __sizeof__(self):
-        return len(json.dumps(self.serialize()))
-
     def __getstate__(self):
         obj = {}
         for item, attr in iteritems(self._attributes):

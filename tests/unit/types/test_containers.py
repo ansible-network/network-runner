@@ -31,6 +31,7 @@ class DictItem(Object):
 def test_index():
     o = Index(cls=ListItem)
 
+    assert repr(o) == str(o.serialize())
     assert o.serialize() == []
 
     item = o.new()
@@ -50,10 +51,32 @@ def test_index():
     with pytest.raises(TypeError):
         o.insert(0, 'foo')
 
+    with pytest.raises(TypeError):
+        o[0] = 'test'
+
+    with pytest.raises(TypeError):
+        o.add("foo")
+
+    # make sure deleting an index doesn't raise an error
+    del o[0]
+
+
+def test_index_comparisons():
+    a = Index(cls=ListItem)
+    b = Index(cls=ListItem)
+
+    assert a.__eq__(b)
+    assert a.__cmp__(b)
+
+    b.new(name='test')
+
+    assert a.__neq__(b)
+
 
 def test_map():
     o = Map(cls=DictItem, key='name')
 
+    assert repr(o) == str(o.serialize())
     assert o.serialize() == {}
 
     item = DictItem(name='foo', value='bar')
@@ -68,3 +91,29 @@ def test_map():
     o = Map(cls=DictItem, key='name')
     o.deserialize({'foo': {'value': 'bar'}})
     assert o['foo'] == item
+
+    with pytest.raises(TypeError):
+        o['test'] = 'test'
+
+    keys = [key for key in o]
+    assert keys == ['foo']
+
+    assert len(o) == 1
+
+    with pytest.raises(ValueError):
+        o.new(name='foo')
+
+    with pytest.raises(ValueError):
+        o.new(value='foo')
+
+
+def test_map_comparisons():
+    a = Map(cls=DictItem, key='name')
+    b = Map(cls=DictItem, key='name')
+
+    assert a.__eq__(b)
+    assert a.__cmp__(b)
+
+    b.new(name='test')
+
+    assert a.__neq__(b)

@@ -72,7 +72,7 @@ class Object(with_metaclass(BaseMeta)):
 
         for key, attr in iteritems(self._attributes):
             value = getattr(self, key, None)
-            if not value or isinstance(value, Attribute):
+            if value is None or isinstance(value, Attribute):
                 setattr(self, key, attr.default)
 
     def __repr__(self):

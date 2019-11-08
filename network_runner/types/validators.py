@@ -46,7 +46,7 @@ class RangeValidator(object):
 
     def __call__(self, value):
         assert isinstance(value, int), 'value must be of type <int>'
-        if self.minval > value > self.maxval:
+        if not self.minval <= value <= self.maxval:
             raise AttributeError('invalid range')
 
 

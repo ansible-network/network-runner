@@ -16,18 +16,19 @@
 from . import base
 
 from network_runner.resources.inventory import Inventory
-from network_runner.resources.inventory.hosts import Host
-from network_runner.resources.inventory.children import Child
-from network_runner.resources.ansible.playbook import Playbook
-from network_runner.resources.ansible.playbook import Play
-from network_runner.resources.ansible.playbook import Task
+from network_runner.resources.inventory import Host
+from network_runner.resources.inventory import Child
+from network_runner.resources.playbook import Playbook
+from network_runner.resources.playbook import Play
+from network_runner.resources.playbook import Task
+
 
 EMPTY_INV = {'all': {'hosts': {}, 'vars': {}, 'children': {}}}
 TEST_HOST = {'name': 'test'}
 EMPTY_CHILD = {'hosts': {}, 'vars': {}}
 EMPTY_PLAYBOOK = []
 EMPTY_PLAY = {'hosts': 'all', 'tasks': []}
-NOOP_TASK = {'noop': {}, 'vars': {}}
+NOOP_TASK = {'action': 'noop', 'args': {}}
 
 
 class TestResourcesInventory(base.NetworkRunnerTestCase):
@@ -56,19 +57,28 @@ class TestResourcesInventory(base.NetworkRunnerTestCase):
         host = Host(name='test',
                     ansible_host='testhost',
                     ansible_user='testuser',
-                    ansible_ssh_pass='testpass',
+                    ansible_password='testpass',
                     ansible_network_os='openvswitch')
 
         self.assertEqual(host.name, 'test')
         self.assertEqual(host.ansible_host, 'testhost')
         self.assertEqual(host.ansible_user, 'testuser')
+        self.assertEqual(host.ansible_password, 'testpass')
         self.assertEqual(host.ansible_ssh_pass, 'testpass')
         self.assertEqual(host.ansible_network_os, 'openvswitch')
 
+    def test_host_attrs_alias(self):
+        host = Host(name='test',
+                    ansible_ssh_pass='testpass')
+
+        self.assertEqual(host.name, 'test')
+        self.assertEqual(host.ansible_password, 'testpass')
+        self.assertEqual(host.ansible_ssh_pass, 'testpass')
+
     def test_host_vars(self):
         host = Host(name='test')
-        host['testvar'] = 'testing123'
-        self.assertEqual(host['testvar'], 'testing123')
+        host.vars['testvar'] = 'testing123'
+        self.assertEqual(host.vars['testvar'], 'testing123')
 
     def test_host_invalid_ansible_network_os(self):
         self.assertRaises(AttributeError, Host, name='test',
@@ -84,6 +94,24 @@ class TestResourcesInventory(base.NetworkRunnerTestCase):
         child.deserialize(EMPTY_CHILD)
         self.assertEqual(child, Child())
 
+    def test_host_vars_kwargs(self):
+        host = Host(name='test',
+                    ansible_host='testhost',
+                    key1='value1',
+                    key2='value2')
+
+        self.assertEqual(host.name, 'test')
+        self.assertEqual(host.ansible_host, 'testhost')
+        self.assertEqual(host.vars, {'key1': 'value1', 'key2': 'value2'})
+
+    def test_child_vars_kwargs(self):
+        child = Child(name='test',
+                      key1='value1',
+                      key2='value2')
+
+        self.assertEqual(child.name, 'test')
+        self.assertEqual(child.vars, {'key1': 'value1', 'key2': 'value2'})
+
 
 class TestResourcesAnsiblePlaybook(base.NetworkRunnerTestCase):
 
@@ -95,8 +123,8 @@ class TestResourcesAnsiblePlaybook(base.NetworkRunnerTestCase):
         self.assertEqual(serialized_playbook, EMPTY_PLAYBOOK)
 
         # TODO(radez) why is [] != [] ???
-        # playbook.deserialize(EMPTY_PLAYBOOK)
-        # self.assertEqual(playbook, Playbook())
+        playbook.deserialize(EMPTY_PLAYBOOK)
+        self.assertEqual(playbook, Playbook())
 
     def test_empty_play(self):
         play = Play()
@@ -109,11 +137,21 @@ class TestResourcesAnsiblePlaybook(base.NetworkRunnerTestCase):
         self.assertEqual(play, Play())
 
     def test_noop_task(self):
-        task = Task(module='noop')
+        task = Task(action='noop')
         self.assertEqual(type(task), Task)
 
         serialized_task = task.serialize()
         self.assertEqual(serialized_task, NOOP_TASK)
 
         task.deserialize(NOOP_TASK)
-        self.assertEqual(task, Task(module='noop'))
+        self.assertEqual(task, Task(action='noop'))
+
+
+def test_serialize_deserialize():
+    pb = Playbook()
+    p = pb.new()
+    p.tasks.new(action='noop', args={'foo': 'bar'})
+    ds = pb.serialize()
+    newpb = Playbook()
+    newpb.deserialize(ds)
+    assert pb.serialize() == newpb.serialize()

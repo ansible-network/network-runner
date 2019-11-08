@@ -20,12 +20,10 @@ import ansible_runner
 
 from network_runner import exceptions
 
-from network_runner.resources.ansible.playbook import Playbook
-from network_runner.resources.ansible.playbook import Play
-from network_runner.resources.ansible.playbook import Task
+from network_runner.resources.playbook import Playbook
 
 from network_runner.resources.inventory import Inventory
-from network_runner.resources.inventory.hosts import Host
+from network_runner.resources.inventory import Host
 
 IMPORT_ROLE = 'import_role'
 NETWORK_RUNNER = 'network-runner'
@@ -86,18 +84,15 @@ class NetworkRunner(object):
         :returns: the results of the playbook run
         :rtype: AnsibleRunner
         """
-        task = Task(module=IMPORT_ROLE)
+        pb = Playbook()
+        play = pb.new(hosts=(hosts or 'all'), gather_facts=False)
+
+        task = play.tasks.new(action=IMPORT_ROLE)
         task.args = {'name': NETWORK_RUNNER, 'tasks_from': tasks_from}
         if variables:
             task.vars = variables
 
-        play = Play(hosts=(hosts or 'all'), gather_facts=False)
-        play.tasks.add(task)
-
-        playbook = Playbook()
-        playbook.add(play)
-
-        return self.run(playbook)
+        return self.run(pb)
 
     def create_vlan(self, hostname, vlan_id, vlan_name=None):
         """Create VLAN.

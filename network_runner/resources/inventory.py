@@ -59,6 +59,18 @@ class Host(Object):
         serialize_when=SERIALIZE_WHEN_NEVER
     )
 
+    def __init__(self, **kwargs):
+        hostvars = {}
+        for item in set(kwargs).difference(self._attributes):
+            hostvars[item] = kwargs[item]
+            kwargs.pop(item)
+
+        if 'vars' not in kwargs:
+            kwargs['vars'] = {}
+        kwargs['vars'].update(hostvars)
+
+        super(Host, self).__init__(**kwargs)
+
     def serialize(self):
         obj = super(Host, self).serialize()
         obj['name'] = self.name
@@ -89,6 +101,18 @@ class Child(Object):
     vars = Attribute(
         type='dict'
     )
+
+    def __init__(self, **kwargs):
+        childvars = {}
+        for item in set(kwargs).difference(self._attributes):
+            childvars[item] = kwargs[item]
+            kwargs.pop(item)
+
+        if 'vars' not in kwargs:
+            kwargs['vars'] = {}
+        kwargs['vars'].update(childvars)
+
+        super(Child, self).__init__(**kwargs)
 
 
 class Inventory(Object):

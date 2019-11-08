@@ -94,6 +94,24 @@ class TestResourcesInventory(base.NetworkRunnerTestCase):
         child.deserialize(EMPTY_CHILD)
         self.assertEqual(child, Child())
 
+    def test_host_vars_kwargs(self):
+        host = Host(name='test',
+                    ansible_host='testhost',
+                    key1='value1',
+                    key2='value2')
+
+        self.assertEqual(host.name, 'test')
+        self.assertEqual(host.ansible_host, 'testhost')
+        self.assertEqual(host.vars, {'key1': 'value1', 'key2': 'value2'})
+
+    def test_child_vars_kwargs(self):
+        child = Child(name='test',
+                      key1='value1',
+                      key2='value2')
+
+        self.assertEqual(child.name, 'test')
+        self.assertEqual(child.vars, {'key1': 'value1', 'key2': 'value2'})
+
 
 class TestResourcesAnsiblePlaybook(base.NetworkRunnerTestCase):
 

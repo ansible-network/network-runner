@@ -198,3 +198,41 @@ def test_object_with_required_attr():
     assert o.required == 'foo'
     with pytest.raises(ValueError):
         InstanceWithRequiredAttr()
+
+
+class Aliases(Object):
+
+    attr1 = Attribute(
+        aliases=('attr2', 'attr3')
+    )
+
+    attr2 = Attribute()
+
+
+def test_attr1_alias():
+    o = Aliases()
+
+    o.attr1 = 'test'
+
+    assert o.attr1 == 'test'
+    assert o.attr2 is None
+    assert o.attr3 == 'test'
+
+    o.attr2 = 'test2'
+
+    assert o.attr1 == 'test'
+    assert o.attr2 == 'test2'
+    assert o.attr3 == 'test'
+
+    del o.attr1
+
+    assert o.attr1 is None
+    assert o.attr2 == 'test2'
+    assert o.attr3 is None
+
+    o.attr1 = 'test'
+    del o.attr2
+
+    assert o.attr1 == 'test'
+    assert o.attr2 is None
+    assert o.attr3 == 'test'

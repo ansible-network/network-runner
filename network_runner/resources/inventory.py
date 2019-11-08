@@ -45,7 +45,8 @@ class Host(Object):
     )
 
     ansible_password = Attribute(
-        serialize_when=SERIALIZE_WHEN_PRESENT
+        serialize_when=SERIALIZE_WHEN_PRESENT,
+        aliases=('ansible_ssh_pass',)
     )
 
     ansible_network_os = Attribute(

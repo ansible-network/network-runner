@@ -35,8 +35,21 @@ class BaseMeta(type):
             for attr_name in attr_dct:
                 attr = attr_dct[attr_name]
                 if isinstance(attr, Attribute):
+                    attr.name = attr_name
+
                     isvalidattrname(attr_name)
                     dct['_attributes'][attr_name] = attr
+
+                    removed = set()
+
+                    for entry in list(attr.aliases):
+                        if entry not in attr_dct:
+                            isvalidattrname(entry)
+                            dct['_attributes'][entry] = attr
+                        elif entry in attr_dct:
+                            removed.add(entry)
+
+                    attr.aliases = tuple(set(attr.aliases).difference(removed))
 
         # process parents first to allow more specific overrides
         for parent in parents:
@@ -50,15 +63,32 @@ class BaseMeta(type):
 class Object(with_metaclass(BaseMeta)):
 
     def __init__(self, **kwargs):
-        for item in self._attributes:
-            setattr(self, item, kwargs.get(item))
+        for key, value in iteritems(kwargs):
+            attr = self._attributes[key]
+            if key == attr.name:
+                setattr(self, key, value)
+            elif key in attr.aliases:
+                setattr(self, attr.name, value)
+
+        for key, attr in iteritems(self._attributes):
+            value = getattr(self, key, None)
+            if not value or isinstance(value, Attribute):
+                setattr(self, key, attr.default)
 
     def __repr__(self):
         return json.dumps(self.serialize())
 
     def __setattr__(self, key, value):
         if key in self._attributes:
-            value = self._attributes[key](value)
+            attr = self._attributes[key]
+            value = attr(value)
+
+            if attr.name != key:
+                self.__dict__[attr.name] = value
+
+            for item in attr.aliases:
+                if item != key:
+                    self.__dict__[item] = value
 
         elif key in dir(self):
             attr = getattr(self, key)
@@ -82,6 +112,12 @@ class Object(with_metaclass(BaseMeta)):
 
         else:
             self.__dict__[key] = attr()
+
+            if attr.name != key:
+                self.__dict__[attr.name] = attr()
+
+            for item in attr.aliases:
+                self.__dict__[item] = attr()
 
     def __eq__(self, other):
         return self.serialize() == other.serialize()

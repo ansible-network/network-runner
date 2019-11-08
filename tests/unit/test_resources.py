@@ -22,6 +22,7 @@ from network_runner.resources.playbook import Playbook
 from network_runner.resources.playbook import Play
 from network_runner.resources.playbook import Task
 
+
 EMPTY_INV = {'all': {'hosts': {}, 'vars': {}, 'children': {}}}
 TEST_HOST = {'name': 'test'}
 EMPTY_CHILD = {'hosts': {}, 'vars': {}}
@@ -63,7 +64,16 @@ class TestResourcesInventory(base.NetworkRunnerTestCase):
         self.assertEqual(host.ansible_host, 'testhost')
         self.assertEqual(host.ansible_user, 'testuser')
         self.assertEqual(host.ansible_password, 'testpass')
+        self.assertEqual(host.ansible_ssh_pass, 'testpass')
         self.assertEqual(host.ansible_network_os, 'openvswitch')
+
+    def test_host_attrs_alias(self):
+        host = Host(name='test',
+                    ansible_ssh_pass='testpass')
+
+        self.assertEqual(host.name, 'test')
+        self.assertEqual(host.ansible_password, 'testpass')
+        self.assertEqual(host.ansible_ssh_pass, 'testpass')
 
     def test_host_vars(self):
         host = Host(name='test')

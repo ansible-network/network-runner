@@ -17,8 +17,8 @@ execute switch level network configuration.
 
     .. code-block:: console
 
-      from network_runner.resources.inventory import Inventory
-      from network_runner.resources.inventory.hosts import Host
+      from network_runner.models.inventory import Inventory
+      from network_runner.models.inventory.hosts import Host
 
       host = Host(name='testhost',
                   ansible_host='192.168.121.37',

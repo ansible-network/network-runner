@@ -15,12 +15,12 @@
 
 from . import base
 
-from network_runner.resources.inventory import Inventory
-from network_runner.resources.inventory import Host
-from network_runner.resources.inventory import Child
-from network_runner.resources.playbook import Playbook
-from network_runner.resources.playbook import Play
-from network_runner.resources.playbook import Task
+from network_runner.models.inventory import Inventory
+from network_runner.models.inventory import Host
+from network_runner.models.inventory import Child
+from network_runner.models.playbook import Playbook
+from network_runner.models.playbook import Play
+from network_runner.models.playbook import Task
 
 
 EMPTY_INV = {'all': {'hosts': {}, 'vars': {}, 'children': {}}}

@@ -20,10 +20,10 @@ import ansible_runner
 
 from network_runner import exceptions
 
-from network_runner.resources.playbook import Playbook
+from network_runner.models.playbook import Playbook
 
-from network_runner.resources.inventory import Inventory
-from network_runner.resources.inventory import Host
+from network_runner.models.inventory import Inventory
+from network_runner.models.inventory import Host
 
 IMPORT_ROLE = 'import_role'
 NETWORK_RUNNER = 'network-runner'
@@ -47,7 +47,7 @@ class NetworkRunner(object):
         object.  The value must be a value ```Host``` instance.
 
         :param host: A valid instance of ```Host```
-        :type host: network_runner.resources.inventory.hosts.Host
+        :type host: network_runner.models.inventory.hosts.Host
 
         :returns: None
         """

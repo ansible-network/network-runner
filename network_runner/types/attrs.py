@@ -16,12 +16,15 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+from copy import deepcopy
 from unicodedata import normalize
 
 from six import PY2
 
 from network_runner.types.containers import Map
 from network_runner.types.containers import Index
+from network_runner.types.validators import TypeValidator
+from network_runner.types.validators import RequiredValueValidator
 
 
 SERIALIZE_WHEN_ALWAYS = 0
@@ -29,110 +32,126 @@ SERIALIZE_WHEN_PRESENT = 1
 SERIALIZE_WHEN_NEVER = 2
 
 
-_ATTR_NAME_TO_TYPE = {
-    'int': int,
-    'bool': bool,
-    'list': list,
-    'dict': dict,
-    'map': Map,
-    'index': Index,
-    'str': str,
-    None: str
-}
-
-
 class Attribute(object):
 
-    def __init__(self, default=None, type='str', required=None,
-                 validator=None, serialize_when=None, aliases=None):
+    def __init__(self, type, default=None, required=None, validators=None,
+                 serialize_when=None, aliases=None):
 
-        self.required = required
-        self.attrtype = type
-        self.default = None
-        self.validator = validator
-        self.aliases = aliases or []
+        self.type = type
         self.name = None
+        self.default = default
+        self.validators = validators or set()
+        self.aliases = aliases or ()
         self.serialize_when = serialize_when or SERIALIZE_WHEN_ALWAYS
 
-        if validator and self.attrtype not in validator.__required_types__:
-            raise AttributeError('invalid validator for attr type')
-
-        if self.attrtype not in _ATTR_NAME_TO_TYPE:
-            raise ValueError("invalid attrtype specified")
-
-        self._attr_type = _ATTR_NAME_TO_TYPE[self.attrtype]
+        try:
+            self.validators = set(self.validators)
+        except Exception:
+            raise AttributeError("validators must be iterable")
 
         if serialize_when is not None:
             if serialize_when not in (0, 1, 2):
                 raise ValueError("invalid value for serialize_when")
 
-        if default is None and self.attrtype in ('list', 'dict'):
-            if self.attrtype == 'list':
-                default = []
-            elif self.attrtype == 'dict':
-                default = {}
+        self.validators.add(TypeValidator(self.type))
 
-        if default is not None:
-            if not isinstance(default, self._attr_type):
+        if required:
+            self.validators.add(RequiredValueValidator())
+            if self.serialize_when > 0:
                 raise AttributeError(
-                    "attribute default must of of type '{}'".format(type)
-                )
-            self.default = default
-
-    def __call__(self, value=None):
-        if value is not None:
-            if self.attrtype == 'bool' and not isinstance(value, bool):
-                raise TypeError('expected type bool')
-
-            if PY2 and isinstance(value, unicode):
-                value = normalize('NFKD', value).encode('ascii', 'ignore')
-
-            if not isinstance(value, self._attr_type):
-                raise TypeError(
-                    "attribute must be of type '{}', "
-                    "got '{}'".format(self.attrtype, type(value))
+                    "required attributes must always be serialized"
                 )
 
-            value = self._attr_type(value)
+        if self.default is not None:
+            for item in self.validators:
+                item(self.default)
 
-            if self.validator:
-                self.validator(value)
-
-        elif self.default is not None:
-            if hasattr(self.default, 'copy'):
-                value = self.default.copy()
-            elif isinstance(self.default, list):
-                value = list(self.default)
-            else:
-                value = self.default
-
-        if self.required is True and value is None:
-            raise ValueError("missing required attribute")
-
-        return value
+    def __call__(self, value):
+        value = value if value is not None else self.default
+        for item in self.validators:
+            item(value)
+        return deepcopy(value)
 
 
-class Container(Attribute):
+class String(Attribute):
 
-    def __init__(self, type, cls, item_key=None):
+    def __init__(self, **kwargs):
+        super(String, self).__init__(type=str, **kwargs)
+
+    def __call__(self, value):
+        if PY2 and isinstance(value, unicode):
+            value = normalize('NFKD', value).encode('ascii', 'ignore')
+        return super(String, self).__call__(value)
+
+
+class Integer(Attribute):
+
+    def __init__(self, *args, **kwargs):
+        return super(Integer, self).__init__(type=int, **kwargs)
+
+
+class Boolean(Attribute):
+
+    def __init__(self, *args, **kwargs):
+        return super(Boolean, self).__init__(type=bool, **kwargs)
+
+
+class List(Attribute):
+
+    def __init__(self, **kwargs):
+        if kwargs.get('default') is None:
+            kwargs['default'] = []
+        super(List, self).__init__(type=list, **kwargs)
+
+
+class Dict(Attribute):
+
+    def __init__(self, **kwargs):
+        if kwargs.get('default') is None:
+            kwargs['default'] = {}
+        super(Dict, self).__init__(type=dict, **kwargs)
+
+
+class TypedObject(Attribute):
+
+    def __init__(self, type, **kwargs):
+        if kwargs.get('default') is None:
+            kwargs['default'] = type()
+        kwargs['type'] = type
+        super(TypedObject, self).__init__(**kwargs)
+
+
+class TypedDict(Attribute):
+
+    def __init__(self, item_class, item_key, **kwargs):
+        self.item_class = item_class
         self.item_key = item_key
-        self.cls = cls
+        if kwargs.get('default') is None:
+            kwargs['default'] = Map(self.item_class, self.item_key)
+        super(TypedDict, self).__init__(type=Map, **kwargs)
 
-        assert type in ('map', 'index'), "invalid container type"
-
-        if type == 'map' and item_key is None:
-            raise ValueError("missing required args 'key' for type 'map'")
-
-        super(Container, self).__init__(type=type)
-
-    def __call__(self, value=None):
-        if self.attrtype == 'map':
-            obj = Map(self.cls, self.item_key)
-
-        elif self.attrtype == 'index':
-            obj = Index(self.cls)
-
-        if value:
+    def __call__(self, value):
+        if isinstance(value, dict):
+            obj = Map(self.item_class, self.item_key)
             obj.deserialize(value)
+            value = obj
+        return super(TypedDict, self).__call__(value)
 
-        return obj
+
+class TypedList(Attribute):
+
+    def __init__(self, item_class, **kwargs):
+        self.item_class = item_class
+        if kwargs.get('default') is None:
+            kwargs['default'] = Index(self.item_class)
+        super(TypedList, self).__init__(type=Index, **kwargs)
+
+    def __call__(self, value):
+        # because a TypedList is serialialized as a list object, the
+        # deserialization process will attempt to pass a native list into the
+        # this method.  this will attempt to recreate the Index object
+        if isinstance(value, list):
+            obj = Index(self.item_class)
+            obj.deserialize(value)
+            value = obj
+        return super(TypedList, self).__call__(value)

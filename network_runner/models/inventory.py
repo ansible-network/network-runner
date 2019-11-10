@@ -17,8 +17,7 @@
 # under the License.
 #
 from network_runner.types.objects import Object
-from network_runner.types.attrs import Attribute
-from network_runner.types.attrs import Container
+from network_runner.types.attrs import String, Dict, TypedDict
 from network_runner.types.attrs import SERIALIZE_WHEN_PRESENT
 from network_runner.types.attrs import SERIALIZE_WHEN_NEVER
 from network_runner.types.validators import ChoiceValidator
@@ -31,31 +30,29 @@ NETWORK_OS_VALIDATOR = ChoiceValidator(
 
 class Host(Object):
 
-    name = Attribute(
-        required=True,
-        serialize_when=SERIALIZE_WHEN_NEVER
+    name = String(
+        required=True
     )
 
-    ansible_host = Attribute(
+    ansible_host = String(
         serialize_when=SERIALIZE_WHEN_PRESENT
     )
 
-    ansible_user = Attribute(
+    ansible_user = String(
         serialize_when=SERIALIZE_WHEN_PRESENT
     )
 
-    ansible_password = Attribute(
+    ansible_password = String(
         serialize_when=SERIALIZE_WHEN_PRESENT,
         aliases=('ansible_ssh_pass',)
     )
 
-    ansible_network_os = Attribute(
+    ansible_network_os = String(
         serialize_when=SERIALIZE_WHEN_PRESENT,
-        validator=NETWORK_OS_VALIDATOR
+        validators=(NETWORK_OS_VALIDATOR,)
     )
 
-    vars = Attribute(
-        type='dict',
+    vars = Dict(
         serialize_when=SERIALIZE_WHEN_NEVER
     )
 
@@ -88,19 +85,16 @@ class Host(Object):
 
 class Child(Object):
 
-    name = Attribute(
+    name = String(
         serialize_when=SERIALIZE_WHEN_NEVER
     )
 
-    hosts = Container(
-        type='map',
-        cls=Host,
+    hosts = TypedDict(
+        item_class=Host,
         item_key='name'
     )
 
-    vars = Attribute(
-        type='dict'
-    )
+    vars = Dict()
 
     def __init__(self, **kwargs):
         childvars = {}
@@ -117,21 +111,17 @@ class Child(Object):
 
 class Inventory(Object):
 
-    hosts = Container(
-        type='map',
-        cls=Host,
+    hosts = TypedDict(
+        item_class=Host,
         item_key='name'
     )
 
-    children = Container(
-        type='map',
-        cls=Child,
+    children = TypedDict(
+        item_class=Child,
         item_key='name'
     )
 
-    vars = Attribute(
-        type='dict'
-    )
+    vars = Dict()
 
     def serialize(self):
         obj = super(Inventory, self).serialize()

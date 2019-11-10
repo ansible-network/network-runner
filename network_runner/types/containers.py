@@ -55,6 +55,12 @@ class Index(MutableSequence):
     def __len__(self):
         return len(self.__dict__['items'])
 
+    def __deepcopy__(self, memo):
+        kwargs = self.serialize()
+        o = type(self)(self.cls)
+        o.deserialize(kwargs)
+        return o
+
     def insert(self, index, value):
         if not isinstance(value, self.cls):
             raise TypeError('invalid type')
@@ -118,6 +124,12 @@ class Map(MutableMapping):
 
     def __len__(self):
         return len(self.__dict__['objects'])
+
+    def __deepcopy__(self, memo):
+        kwargs = self.serialize()
+        o = type(self)(self.cls, self.key)
+        o.deserialize(kwargs)
+        return o
 
     def add(self, obj):
         assert isinstance(obj, self.cls)

@@ -18,34 +18,43 @@
 #
 
 
-class BaseValidator(object):
+class TypeValidator(object):
 
-    __required_types__ = ()
+    def __init__(self, type):
+        self.type = type
+
+    def __call__(self, value):
+        if value is not None and not isinstance(value, self.type):
+            raise TypeError(
+                "value must be {}, got {}".format(self.type, type(value))
+            )
 
 
-class ChoiceValidator(BaseValidator):
+class RequiredValueValidator(object):
 
-    __required_types__ = ('str',)
+    def __call__(self, value):
+        if value is None:
+            raise ValueError("missing required value")
+
+
+class ChoiceValidator(object):
 
     def __init__(self, choices):
         self.choices = frozenset(choices)
 
     def __call__(self, value):
-        if value not in self.choices:
+        if value is not None and value not in self.choices:
             msg = '{} is an invalid choice. Possible choices are: {}'
             raise AttributeError(msg.format(value, self.choices))
 
 
 class RangeValidator(object):
 
-    __required_types__ = ('int',)
-
     def __init__(self, minval, maxval):
         self.minval = minval
         self.maxval = maxval
 
     def __call__(self, value):
-        assert isinstance(value, int), 'value must be of type <int>'
         if not self.minval <= value <= self.maxval:
             raise AttributeError('invalid range')
 

@@ -15,30 +15,29 @@
 import pytest
 
 from network_runner.types.objects import Object
-from network_runner.types.attrs import Attribute
+from network_runner.types.attrs import String, Integer, Boolean, List, Dict
 
 
 class Instance(Object):
-    name = Attribute()
-    strattr = Attribute(type='str')
-    intattr = Attribute(type='int')
-    boolattr = Attribute(type='bool')
-    listattr = Attribute(type='list')
-    dictattr = Attribute(type='dict')
+    name = String()
+    strattr = String()
+    intattr = Integer()
+    boolattr = Boolean()
+    listattr = List()
+    dictattr = Dict()
 
 
 class InstanceWithDefaults(Object):
-    name = Attribute()
-    strattr = Attribute(type='str', default='string')
-    intattr = Attribute(type='int', default=0)
-    boolattr = Attribute(type='bool', default=False)
-    listattr = Attribute(type='list', default=[1, 2, 3])
-    dictattr = Attribute(type='dict',
-                         default={'one': 1, 'two': 2, 'three': 3})
+    name = String()
+    strattr = String(default='string')
+    intattr = Integer(default=0)
+    boolattr = Boolean(default=False)
+    listattr = List(default=[1, 2, 3])
+    dictattr = Dict(default={'one': 1, 'two': 2, 'three': 3})
 
 
 class InstanceWithRequiredAttr(Object):
-    required = Attribute(type='str', required=True)
+    required = String(required=True)
 
 
 def test_instance():
@@ -98,11 +97,9 @@ def test_set_listattr():
 def test_set_dictattr():
     o = Instance()
     o.dictattr = {'one': 1, 'two': 2, 'three': 3}
-    with pytest.raises(TypeError):
-        o.dictattr = "string"
-        o.dictattr = 0
-        o.dictattr = True
-        o.dictattr = [1, 2, 3]
+    for value in ('string', 0, True, [1, 2, 3]):
+        with pytest.raises(TypeError):
+            o.dictattr = value
 
 
 def test_del_strattr():
@@ -218,11 +215,11 @@ def test_object_with_required_attr():
 
 class Aliases(Object):
 
-    attr1 = Attribute(
+    attr1 = String(
         aliases=('attr2', 'attr3')
     )
 
-    attr2 = Attribute()
+    attr2 = String()
 
 
 def test_attr1_alias():

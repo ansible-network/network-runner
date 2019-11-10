@@ -63,17 +63,21 @@ class BaseMeta(type):
 class Object(with_metaclass(BaseMeta)):
 
     def __init__(self, **kwargs):
+        attrs = list(self._attributes)
+
         for key, value in iteritems(kwargs):
+            attrs.remove(key)
             attr = self._attributes[key]
+
             if key == attr.name:
                 setattr(self, key, value)
             elif key in attr.aliases:
                 setattr(self, attr.name, value)
 
-        for key, attr in iteritems(self._attributes):
-            value = getattr(self, key, None)
-            if value is None or isinstance(value, Attribute):
-                setattr(self, key, attr.default)
+        for key in attrs:
+            if not hasattr(self, key) or \
+               isinstance(getattr(self, key), Attribute):
+                setattr(self, key, self._attributes[key].default)
 
     def __repr__(self):
         return json.dumps(self.serialize())
@@ -81,6 +85,7 @@ class Object(with_metaclass(BaseMeta)):
     def __setattr__(self, key, value):
         if key in self._attributes:
             attr = self._attributes[key]
+
             value = attr(value)
 
             if attr.name != key:
@@ -102,22 +107,9 @@ class Object(with_metaclass(BaseMeta)):
         self.__dict__[key] = value
 
     def __delattr__(self, key):
-        attr = self._attributes.get(key)
-
-        if attr and attr.required is True:
-            raise ValueError('required attributes cannot be deleted')
-
-        elif not attr and key in dir(self):
+        if key not in self._attributes and key in dir(self):
             raise AttributeError("cannot delete attribute '{}'".format(key))
-
-        else:
-            self.__dict__[key] = attr()
-
-            if attr.name != key:
-                self.__dict__[attr.name] = attr()
-
-            for item in attr.aliases:
-                self.__dict__[item] = attr()
+        self.__setattr__(key, None)
 
     def __eq__(self, other):
         return self.serialize() == other.serialize()
@@ -128,12 +120,16 @@ class Object(with_metaclass(BaseMeta)):
     def __cmp__(self, other):
         return self.__eq__(other)
 
+    def __deepcopy__(self, memo):
+        kwargs = self.serialize()
+        return type(self)(**kwargs)
+
     def __getstate__(self):
         obj = {}
         for item, attr in iteritems(self._attributes):
             value = getattr(self, item)
 
-            if attr.attrtype in ('dict', 'list'):
+            if attr.type in (dict, list):
                 if value and attr.serialize_when != SERIALIZE_WHEN_NEVER or \
                     attr.serialize_when == SERIALIZE_WHEN_ALWAYS:
 

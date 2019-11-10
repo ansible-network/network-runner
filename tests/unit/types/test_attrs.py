@@ -17,92 +17,96 @@ import pytest
 from network_runner.types import attrs
 from network_runner.types.objects import Object
 from network_runner.types.attrs import Attribute
-from network_runner.types.attrs import Container
+from network_runner.types.attrs import String, Integer, Boolean, List, Dict
+from network_runner.types.attrs import TypedDict, TypedList
 from network_runner.types.containers import Map
 from network_runner.types.containers import Index
-from network_runner.types.validators import ChoiceValidator
 
 
 class Item(Object):
-    name = Attribute()
+    name = String()
 
 
 def test_create_attribute_defaults():
-    a = Attribute()
-    assert a.required is None
-    assert a.attrtype == 'str'
+    a = Attribute(type=None)
+    assert a.type is None
     assert a.default is None
-    assert a.validator is None
-    assert isinstance(a._attr_type, type(str))
+    assert isinstance(a.validators, set)
+    assert a.aliases == tuple()
+    assert a.serialize_when == 0
 
 
 def test_str_attribute():
-    a = Attribute(type='str')
-    assert a.attrtype == 'str'
-    assert isinstance(a._attr_type, type(str))
+    a = String()
+    assert a.type == str
+    assert a.default is None
 
 
 def test_bool_attribute():
-    a = Attribute(type='bool')
-    assert a.attrtype == 'bool'
-    assert isinstance(a._attr_type, type(bool))
+    a = Boolean()
+    assert a.type == bool
+    assert a.default is None
 
 
 def test_int_attribute():
-    a = Attribute(type='int')
-    assert a.attrtype == 'int'
-    assert isinstance(a._attr_type, type(int))
+    a = Integer()
+    assert a.type == int
+    assert a.default is None
 
 
 def test_list_attribute():
-    a = Attribute(type='list')
-    assert a.attrtype == 'list'
-    assert isinstance(a._attr_type, type(list))
+    a = List()
+    assert a.type == list
+    assert a.default == []
 
 
 def test_dict_attribute():
-    a = Attribute(type='dict')
-    assert a.attrtype == 'dict'
-    assert isinstance(a._attr_type, type(dict))
+    a = Dict()
+    assert a.type == dict
+    assert a.default == {}
 
 
-def test_invalid_attribute():
-    with pytest.raises(ValueError):
-        Attribute(type='foo')
+def test_attribute_requires_type():
+    with pytest.raises(TypeError):
+        Attribute()
 
 
 def test_invalid_default_type():
-    with pytest.raises(AttributeError):
-        Attribute(type='str', default=1)
+    with pytest.raises(TypeError):
+        Attribute(type=str, default=1)
 
 
 def test_call_list_with_default_value():
     """Ensure a copy of the default value is returned
     """
     default_value = [1, 2, 3]
-    a = Attribute(type='list', default=default_value)
-    z = a()
+    a = List(default=default_value)
+    z = a(None)
     assert id(z) != id(default_value)
+    assert z == default_value
 
 
 def test_call_dict_with_default_value():
     """Ensure a copy of the default value is returned
     """
     default_value = {'one': 1, 'two': 2, 'three': 3}
-    a = Attribute(type='dict', default=default_value)
-    z = a()
+    a = Dict(default=default_value)
+    z = a(None)
     assert id(z) != id(default_value)
+    assert z == default_value
 
 
-def test_map_container():
-    c = Container('map', Item, 'name')
-    r = c()
+def test_typeddict_container():
+    c = TypedDict(Item, 'name')
+    assert isinstance(c, TypedDict)
+    r = c(None)
     assert isinstance(r, Map)
 
 
-def test_index_container():
-    c = Container('index', Item)
-    r = c()
+def test_typedlist_container():
+    c = TypedList(Item)
+    assert isinstance(c, TypedList)
+    r = c(None)
     assert isinstance(r, Index)
 
 
@@ -112,26 +116,9 @@ def test_enums():
     assert attrs.SERIALIZE_WHEN_NEVER == 2
 
 
-def test_attr_map():
-    assert attrs._ATTR_NAME_TO_TYPE['int'] is int
-    assert attrs._ATTR_NAME_TO_TYPE['bool'] is bool
-    assert attrs._ATTR_NAME_TO_TYPE['list'] is list
-    assert attrs._ATTR_NAME_TO_TYPE['dict'] is dict
-    assert attrs._ATTR_NAME_TO_TYPE['map'] is Map
-    assert attrs._ATTR_NAME_TO_TYPE['index'] is Index
-    assert attrs._ATTR_NAME_TO_TYPE['str'] is str
-    assert attrs._ATTR_NAME_TO_TYPE[None] is str
-    assert len(attrs._ATTR_NAME_TO_TYPE) == 8
-
-
-def test_bad_validator():
-    with pytest.raises(AttributeError):
-        Attribute(type='int', validator=ChoiceValidator([1, 2, 3]))
-
-
 def test_bad_serialize_when_value():
     with pytest.raises(ValueError):
-        Attribute(serialize_when=3)
+        Attribute(None, serialize_when=3)
 
 
 def test_bad_value_type():
@@ -140,11 +127,6 @@ def test_bad_value_type():
         item.name = 1
 
 
-def test_map_container_missing_item_key():
-    with pytest.raises(ValueError):
-        Container(type='map', cls=None)
-
-
-def test_invalid_container_type():
-    with pytest.raises(AssertionError):
-        Container(type='invalid', cls=None)
+def test_typeddict_missing_item_key():
+    with pytest.raises(TypeError):
+        TypedDict(item_class=None)

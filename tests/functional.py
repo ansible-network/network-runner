@@ -3,7 +3,7 @@ import json
 import os
 
 from network_runner import api
-from network_runner.resources.inventory import Inventory
+from network_runner.models.inventory import Inventory
 
 TRUNK_SUPPORT = ('cumulus', 'eos', 'junos', 'openvswitch')
 PORTS = {

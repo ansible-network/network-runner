@@ -27,7 +27,7 @@ EMPTY_INV = {'all': {'hosts': {}, 'vars': {}, 'children': {}}}
 TEST_HOST = {'name': 'test'}
 EMPTY_CHILD = {'hosts': {}, 'vars': {}}
 EMPTY_PLAYBOOK = []
-EMPTY_PLAY = {'hosts': 'all', 'tasks': []}
+EMPTY_PLAY = {'hosts': 'all'}
 NOOP_TASK = {'action': 'noop', 'args': {}}
 
 
@@ -54,13 +54,11 @@ class TestResourcesInventory(base.NetworkRunnerTestCase):
         self.assertEqual(host, Host(name='test'))
 
     def test_host_attrs(self):
-        host = Host(name='test',
-                    ansible_host='testhost',
+        host = Host(ansible_host='testhost',
                     ansible_user='testuser',
                     ansible_password='testpass',
                     ansible_network_os='openvswitch')
 
-        self.assertEqual(host.name, 'test')
         self.assertEqual(host.ansible_host, 'testhost')
         self.assertEqual(host.ansible_user, 'testuser')
         self.assertEqual(host.ansible_password, 'testpass')
@@ -68,10 +66,8 @@ class TestResourcesInventory(base.NetworkRunnerTestCase):
         self.assertEqual(host.ansible_network_os, 'openvswitch')
 
     def test_host_attrs_alias(self):
-        host = Host(name='test',
-                    ansible_ssh_pass='testpass')
+        host = Host(ansible_ssh_pass='testpass')
 
-        self.assertEqual(host.name, 'test')
         self.assertEqual(host.ansible_password, 'testpass')
         self.assertEqual(host.ansible_ssh_pass, 'testpass')
 
@@ -95,21 +91,17 @@ class TestResourcesInventory(base.NetworkRunnerTestCase):
         self.assertEqual(child, Child())
 
     def test_host_vars_kwargs(self):
-        host = Host(name='test',
-                    ansible_host='testhost',
+        host = Host(ansible_host='testhost',
                     key1='value1',
                     key2='value2')
 
-        self.assertEqual(host.name, 'test')
         self.assertEqual(host.ansible_host, 'testhost')
         self.assertEqual(host.vars, {'key1': 'value1', 'key2': 'value2'})
 
     def test_child_vars_kwargs(self):
-        child = Child(name='test',
-                      key1='value1',
+        child = Child(key1='value1',
                       key2='value2')
 
-        self.assertEqual(child.name, 'test')
         self.assertEqual(child.vars, {'key1': 'value1', 'key2': 'value2'})
 
 

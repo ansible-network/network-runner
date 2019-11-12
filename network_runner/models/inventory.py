@@ -17,7 +17,7 @@
 # under the License.
 #
 from network_runner.types.objects import Object
-from network_runner.types.attrs import String, Dict, TypedDict
+from network_runner.types.attrs import String, Dict, Map
 from network_runner.types.attrs import SERIALIZE_WHEN_PRESENT
 from network_runner.types.attrs import SERIALIZE_WHEN_NEVER
 from network_runner.types.validators import ChoiceValidator
@@ -31,7 +31,7 @@ NETWORK_OS_VALIDATOR = ChoiceValidator(
 class Host(Object):
 
     name = String(
-        required=True
+        serialize_when=SERIALIZE_WHEN_PRESENT
     )
 
     ansible_host = String(
@@ -70,7 +70,6 @@ class Host(Object):
 
     def serialize(self):
         obj = super(Host, self).serialize()
-        obj['name'] = self.name
         obj.update(self.vars)
         return obj
 
@@ -86,12 +85,11 @@ class Host(Object):
 class Child(Object):
 
     name = String(
-        serialize_when=SERIALIZE_WHEN_NEVER
+        serialize_when=SERIALIZE_WHEN_PRESENT
     )
 
-    hosts = TypedDict(
-        item_class=Host,
-        item_key='name'
+    hosts = Map(
+        cls=Host
     )
 
     vars = Dict()
@@ -111,14 +109,12 @@ class Child(Object):
 
 class Inventory(Object):
 
-    hosts = TypedDict(
-        item_class=Host,
-        item_key='name'
+    hosts = Map(
+        cls=Host
     )
 
-    children = TypedDict(
-        item_class=Child,
-        item_key='name'
+    children = Map(
+        cls=Child
     )
 
     vars = Dict()

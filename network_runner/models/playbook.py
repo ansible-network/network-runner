@@ -17,10 +17,11 @@
 # under the License.
 #
 from network_runner.types.objects import Object
-from network_runner.types.attrs import String, Dict, TypedList, Boolean
-from network_runner.types.containers import Index
+from network_runner.types.containers import IndexContainer
+from network_runner.types.attrs import String, Dict, Index, Boolean
 
 from network_runner.types.attrs import SERIALIZE_WHEN_PRESENT
+from network_runner.types.attrs import SERIALIZE_WHEN_NEVER
 
 
 class Base(object):
@@ -51,6 +52,30 @@ class Task(Base, Object):
     )
 
 
+class Role(Object):
+
+    role = String(
+        required=True
+    )
+
+    vars = Dict(
+        serialize_when=SERIALIZE_WHEN_NEVER
+    )
+
+    def serialize(self):
+        obj = super(Role, self).serialize()
+        obj.update(self.vars)
+        return obj
+
+    def deserialize(self, ds):
+        assert isinstance(ds, dict)
+        obj = {}
+        for name in self._attributes:
+            obj[name] = ds.pop(name, None)
+        super(Role, self).deserialize(obj)
+        self.vars.update(ds)
+
+
 class Play(Base, Object):
 
     name = String(
@@ -65,12 +90,18 @@ class Play(Base, Object):
         serialize_when=SERIALIZE_WHEN_PRESENT
     )
 
-    tasks = TypedList(
-        item_class=Task
+    roles = Index(
+        cls=Role,
+        serialize_when=SERIALIZE_WHEN_PRESENT
+    )
+
+    tasks = Index(
+        cls=Task,
+        serialize_when=SERIALIZE_WHEN_PRESENT
     )
 
 
-class Playbook(Index):
+class Playbook(IndexContainer):
 
     def __init__(self):
         super(Playbook, self).__init__(Play)

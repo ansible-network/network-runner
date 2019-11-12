@@ -38,6 +38,9 @@ class RequiredValueValidator(object):
 
 
 class ChoiceValidator(object):
+    """Validates the provided value is one of a static
+    list of values
+    """
 
     def __init__(self, choices):
         self.choices = frozenset(choices)
@@ -49,6 +52,9 @@ class ChoiceValidator(object):
 
 
 class RangeValidator(object):
+    """Validates that an integer value is contained within a
+    minimum and maximum value.
+    """
 
     def __init__(self, minval, maxval):
         self.minval = minval
@@ -60,6 +66,9 @@ class RangeValidator(object):
 
 
 class PortValidator(RangeValidator):
+    """Validates an integer is contained within the valid list
+    of TCP and/or UDP port numbers (1-65535)
+    """
 
     def __init__(self):
         super(PortValidator, self).__init__(1, 65535)

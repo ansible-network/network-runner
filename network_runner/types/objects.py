@@ -23,6 +23,8 @@ from six import with_metaclass, iteritems
 from network_runner.types.attrs import Attribute
 from network_runner.types.attrs import SERIALIZE_WHEN_ALWAYS
 from network_runner.types.attrs import SERIALIZE_WHEN_NEVER
+from network_runner.types.containers import MapContainer
+from network_runner.types.containers import IndexContainer
 from network_runner.helpers import isvalidattrname
 
 
@@ -129,7 +131,7 @@ class Object(with_metaclass(BaseMeta)):
         for item, attr in iteritems(self._attributes):
             value = getattr(self, item)
 
-            if attr.type in (dict, list):
+            if attr.type in (dict, list, MapContainer, IndexContainer):
                 if value and attr.serialize_when != SERIALIZE_WHEN_NEVER or \
                     attr.serialize_when == SERIALIZE_WHEN_ALWAYS:
 

@@ -1,0 +1,25 @@
+---
+validators:
+  vlan_id: { type: range, minval: 1, maxval: 4094 }
+
+models:
+  vlan:
+    vlan_id: { type: int, required: True, validators: vlan_id }
+    vlan_name: { type: str }
+
+actions:
+
+  create_vlan:
+    tasks_from: create_vlan
+    args:
+      vlan: { type: vlan }
+    vars:
+      commit_config: no
+
+  delete_vlan:
+    args:
+      vlan_id: { type: int, required: True, validators: vlan_id}
+
+  delete_port:
+    args:
+      port_name: { type: str }

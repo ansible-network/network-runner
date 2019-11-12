@@ -18,9 +18,9 @@ from network_runner.types import attrs
 from network_runner.types.objects import Object
 from network_runner.types.attrs import Attribute
 from network_runner.types.attrs import String, Integer, Boolean, List, Dict
-from network_runner.types.attrs import TypedDict, TypedList
-from network_runner.types.containers import Map
-from network_runner.types.containers import Index
+from network_runner.types.attrs import Map, Index
+from network_runner.types.containers import MapContainer
+from network_runner.types.containers import IndexContainer
 
 
 class Item(Object):
@@ -97,17 +97,17 @@ def test_call_dict_with_default_value():
 
 
 def test_typeddict_container():
-    c = TypedDict(Item, 'name')
-    assert isinstance(c, TypedDict)
+    c = Map(Item, 'name')
+    assert isinstance(c, Map)
     r = c(None)
-    assert isinstance(r, Map)
+    assert isinstance(r, MapContainer)
 
 
 def test_typedlist_container():
-    c = TypedList(Item)
-    assert isinstance(c, TypedList)
+    c = Index(Item)
+    assert isinstance(c, Index)
     r = c(None)
-    assert isinstance(r, Index)
+    assert isinstance(r, IndexContainer)
 
 
 def test_enums():
@@ -125,8 +125,3 @@ def test_bad_value_type():
     with pytest.raises(TypeError):
         item = Item()
         item.name = 1
-
-
-def test_typeddict_missing_item_key():
-    with pytest.raises(TypeError):
-        TypedDict(item_class=None)

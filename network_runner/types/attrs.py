@@ -21,8 +21,8 @@ from unicodedata import normalize
 
 from six import PY2
 
-from network_runner.types.containers import Map
-from network_runner.types.containers import Index
+from network_runner.types.containers import IndexContainer
+from network_runner.types.containers import MapContainer
 from network_runner.types.validators import TypeValidator
 from network_runner.types.validators import RequiredValueValidator
 
@@ -34,11 +34,11 @@ SERIALIZE_WHEN_NEVER = 2
 
 class Attribute(object):
 
-    def __init__(self, type, default=None, required=None, validators=None,
-                 serialize_when=None, aliases=None):
+    def __init__(self, type, name=None, default=None, required=None,
+                 validators=None, serialize_when=None, aliases=None):
 
         self.type = type
-        self.name = None
+        self.name = name
         self.default = default
         self.validators = validators or set()
         self.aliases = aliases or ()
@@ -112,46 +112,45 @@ class Dict(Attribute):
         super(Dict, self).__init__(type=dict, **kwargs)
 
 
-class TypedObject(Attribute):
+class Object(Attribute):
 
     def __init__(self, type, **kwargs):
         if kwargs.get('default') is None:
             kwargs['default'] = type()
         kwargs['type'] = type
-        super(TypedObject, self).__init__(**kwargs)
+        super(Object, self).__init__(**kwargs)
 
 
-class TypedDict(Attribute):
+class Map(Attribute):
 
-    def __init__(self, item_class, item_key, **kwargs):
-        self.item_class = item_class
-        self.item_key = item_key
+    def __init__(self, cls, item_key=None, **kwargs):
+        self.cls = cls
         if kwargs.get('default') is None:
-            kwargs['default'] = Map(self.item_class, self.item_key)
-        super(TypedDict, self).__init__(type=Map, **kwargs)
+            kwargs['default'] = MapContainer(self.cls)
+        super(Map, self).__init__(type=MapContainer, **kwargs)
 
     def __call__(self, value):
         if isinstance(value, dict):
-            obj = Map(self.item_class, self.item_key)
+            obj = MapContainer(self.cls)
             obj.deserialize(value)
             value = obj
-        return super(TypedDict, self).__call__(value)
+        return super(Map, self).__call__(value)
 
 
-class TypedList(Attribute):
+class Index(Attribute):
 
-    def __init__(self, item_class, **kwargs):
-        self.item_class = item_class
+    def __init__(self, cls, **kwargs):
+        self.cls = cls
         if kwargs.get('default') is None:
-            kwargs['default'] = Index(self.item_class)
-        super(TypedList, self).__init__(type=Index, **kwargs)
+            kwargs['default'] = IndexContainer(self.cls)
+        super(Index, self).__init__(type=IndexContainer, **kwargs)
 
     def __call__(self, value):
-        # because a TypedList is serialialized as a list object, the
+        # because a Index is serialialized as a list object, the
         # deserialization process will attempt to pass a native list into the
         # this method.  this will attempt to recreate the Index object
         if isinstance(value, list):
-            obj = Index(self.item_class)
+            obj = IndexContainer(self.cls)
             obj.deserialize(value)
             value = obj
-        return super(TypedList, self).__call__(value)
+        return super(Index, self).__call__(value)

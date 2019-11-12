@@ -16,7 +16,7 @@ import pytest
 
 from network_runner.types.objects import Object
 from network_runner.types.attrs import String
-from network_runner.types.containers import Index, Map
+from network_runner.types.containers import IndexContainer, MapContainer
 
 
 class ListItem(Object):
@@ -29,7 +29,7 @@ class DictItem(Object):
 
 
 def test_index():
-    o = Index(cls=ListItem)
+    o = IndexContainer(cls=ListItem)
 
     assert repr(o) == str(o.serialize())
     assert o.serialize() == []
@@ -42,7 +42,7 @@ def test_index():
     assert o[0] == item
 
     items = [{'name': 'test1'}, {'name': 'test2'}, {'name': 'test3'}]
-    o = Index(cls=ListItem)
+    o = IndexContainer(cls=ListItem)
     o.deserialize(items)
     assert o.serialize() == items
 
@@ -55,15 +55,15 @@ def test_index():
         o[0] = 'test'
 
     with pytest.raises(TypeError):
-        o.add("foo")
+        o.append("foo")
 
     # make sure deleting an index doesn't raise an error
     del o[0]
 
 
 def test_index_comparisons():
-    a = Index(cls=ListItem)
-    b = Index(cls=ListItem)
+    a = IndexContainer(cls=ListItem)
+    b = IndexContainer(cls=ListItem)
 
     assert a.__eq__(b)
     assert a.__cmp__(b)
@@ -74,22 +74,19 @@ def test_index_comparisons():
 
 
 def test_map():
-    o = Map(cls=DictItem, key='name')
+    o = MapContainer(cls=DictItem)
 
     assert repr(o) == str(o.serialize())
     assert o.serialize() == {}
 
     item = DictItem(name='foo', value='bar')
-    o.new(name='foo', value='bar')
+    o.new('foo', name='foo', value='bar')
     assert o['foo'] == item
 
     del o['foo']
 
-    o.add(item)
-    assert o['foo'] == item
-
-    o = Map(cls=DictItem, key='name')
-    o.deserialize({'foo': {'value': 'bar'}})
+    o = MapContainer(cls=DictItem)
+    o.deserialize({'foo': {'name': 'foo', 'value': 'bar'}})
     assert o['foo'] == item
 
     with pytest.raises(TypeError):
@@ -100,20 +97,17 @@ def test_map():
 
     assert len(o) == 1
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         o.new(name='foo')
-
-    with pytest.raises(ValueError):
-        o.new(value='foo')
 
 
 def test_map_comparisons():
-    a = Map(cls=DictItem, key='name')
-    b = Map(cls=DictItem, key='name')
+    a = MapContainer(cls=DictItem)
+    b = MapContainer(cls=DictItem)
 
     assert a.__eq__(b)
     assert a.__cmp__(b)
 
-    b.new(name='test')
+    b.new('test')
 
     assert a.__neq__(b)

@@ -16,17 +16,60 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import os
+import uuid
+
 import ansible_runner
 
 from network_runner import exceptions
 
 from network_runner.models.playbook import Playbook
-
 from network_runner.models.inventory import Inventory
 from network_runner.models.inventory import Host
 
+
 IMPORT_ROLE = 'import_role'
 NETWORK_RUNNER = 'network-runner'
+
+
+def run(playbook, inventory, quiet=True):
+    """Execute a playbook with inventory
+
+    :param playbook: the playbook to run
+    :type playbook: `network_runner.resources.playbook:Playbook`
+
+    :param inventory: the inventory to run the playbook against
+    :type inventory: `network_runner.resources.inventory:Inventory`
+
+    :param quiet: control whether or not playbook output is displayed
+    :type quiet: bool
+
+    :returns: the result from runner
+    :rtype: `ansible_runner.interface:Runner`
+    """
+    assert isinstance(playbook, Playbook)
+    assert isinstance(inventory, Inventory)
+
+    data_dir = os.path.join(
+        os.path.expanduser('~/.network-runner'), str(uuid.uuid4())
+    )
+
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+
+    # invoke ansible networking via ansible runner
+    result = ansible_runner.run(playbook=playbook.serialize(),
+                                inventory=inventory.serialize(),
+                                quiet=quiet,
+                                private_data_dir=data_dir,
+                                settings={'pexpect_use_poll': False})
+
+    # check for failure
+    if result.status == 'failed' or \
+            (result.stats and result.stats.get('failures', [])):
+        raise exceptions.NetworkRunnerException(' '.join(result.stdout))
+
+    return result
 
 
 class NetworkRunner(object):
@@ -52,24 +95,9 @@ class NetworkRunner(object):
         :returns: None
         """
         assert isinstance(host, Host)
-        self.inventory.hosts.add(host)
+        self.inventory.hosts[host.name] = host
 
-    def run(self, playbook):
-        assert isinstance(playbook, Playbook)
-
-        # invoke ansible networking via ansible runner
-        result = ansible_runner.run(playbook=playbook.serialize(),
-                                    inventory=self.inventory.serialize(),
-                                    settings={'pexpect_use_poll': False})
-
-        # check for failure
-        if result.status == 'failed' or \
-                (result.stats and result.stats.get('failures', [])):
-            raise exceptions.NetworkRunnerException(' '.join(result.stdout))
-
-        return result
-
-    def play(self, tasks_from, hosts=None, variables=None):
+    def play(self, action, hosts=None, variables=None):
         """Play a set of tasks from the role
 
         :param tasks_from: the task to play
@@ -87,12 +115,16 @@ class NetworkRunner(object):
         pb = Playbook()
         play = pb.new(hosts=(hosts or 'all'), gather_facts=False)
 
-        task = play.tasks.new(action=IMPORT_ROLE)
-        task.args = {'name': NETWORK_RUNNER, 'tasks_from': tasks_from}
-        if variables:
-            task.vars = variables
+        role = play.roles.new(role=NETWORK_RUNNER)
+        role.vars = variables
 
-        return self.run(pb)
+        if variables is None:
+            variables = {}
+
+        variables['network_action'] = action
+        role.vars = variables
+
+        return run(pb, self.inventory)
 
     def create_vlan(self, hostname, vlan_id, vlan_name=None):
         """Create VLAN.

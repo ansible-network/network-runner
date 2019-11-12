@@ -23,11 +23,11 @@ from collections import MutableMapping, MutableSequence
 from six import iteritems
 
 
-class Index(MutableSequence):
+class Container(object):
 
     def __init__(self, cls):
-        self.items = list()
         self.cls = cls
+        self.store = None
 
     def __repr__(self):
         return json.dumps(self.serialize())
@@ -41,39 +41,50 @@ class Index(MutableSequence):
     def __cmp__(self, other):
         return self.__eq__(other)
 
-    def __getitem__(self, index):
-        return self.__dict__['items'][index]
-
-    def __setitem__(self, index, value):
-        if not isinstance(value, self.cls):
-            raise TypeError('invalid type')
-        self.__dict__['items'][index] = value
-
-    def __delitem__(self, index):
-        del self.__dict__['items'][index]
-
-    def __len__(self):
-        return len(self.__dict__['items'])
-
     def __deepcopy__(self, memo):
         kwargs = self.serialize()
         o = type(self)(self.cls)
         o.deserialize(kwargs)
         return o
 
+    def new(self, **kwargs):
+        raise NotImplementedError
+
+    def serialzie(self):
+        raise NotImplementedError
+
+    def deserialize(self, ds):
+        raise NotImplementedError
+
+
+class IndexContainer(MutableSequence, Container):
+
+    def __init__(self, cls):
+        super(IndexContainer, self).__init__(cls)
+        self.store = list()
+
+    def __getitem__(self, index):
+        return self.__dict__['store'][index]
+
+    def __setitem__(self, index, value):
+        if not isinstance(value, self.cls):
+            raise TypeError('invalid type')
+        self.__dict__['store'][index] = value
+
+    def __delitem__(self, index):
+        del self.__dict__['store'][index]
+
+    def __len__(self):
+        return len(self.__dict__['store'])
+
     def insert(self, index, value):
         if not isinstance(value, self.cls):
             raise TypeError('invalid type')
-        self.items.insert(index, value)
-
-    def add(self, obj):
-        if not isinstance(obj, self.cls):
-            raise TypeError('invalid object type')
-        self.append(obj)
+        self.store.insert(index, value)
 
     def new(self, **kwargs):
         obj = self.cls(**kwargs)
-        self.add(obj)
+        self.append(obj)
         return obj
 
     def __setstate__(self, ds):
@@ -84,84 +95,55 @@ class Index(MutableSequence):
     deserialize = __setstate__
 
     def __getstate__(self):
-        return [o.serialize() for o in self.items]
+        return [o.serialize() for o in self.store]
 
     serialize = __getstate__
 
 
-class Map(MutableMapping):
+class MapContainer(MutableMapping, Container):
 
-    def __init__(self, cls, key):
-        self.objects = {}
-        self.cls = cls
-        self.key = key
+    def __init__(self, cls):
+        super(MapContainer, self).__init__(cls)
+        self.store = {}
 
-    def __repr__(self):
-        return json.dumps(self.serialize())
+    def __getitem__(self, index):
+        return self.__dict__['store'][index]
 
-    def __eq__(self, other):
-        return self.serialize() == other.serialize()
-
-    def __neq__(self, other):
-        return not self.__eq__(other)
-
-    def __cmp__(self, other):
-        return self.__eq__(other)
-
-    def __getitem__(self, key):
-        return self.__dict__['objects'][key]
-
-    def __setitem__(self, key, value):
+    def __setitem__(self, index, value):
         if not isinstance(value, self.cls):
-            raise TypeError("invalid type")
-        self.__dict__['objects'][key] = value
+            raise TypeError('invalid type')
+        self.__dict__['store'][index] = value
 
-    def __delitem__(self, key):
-        del self.__dict__['objects'][key]
-
-    def __iter__(self):
-        return iter(self.__dict__['objects'])
+    def __delitem__(self, index):
+        del self.__dict__['store'][index]
 
     def __len__(self):
-        return len(self.__dict__['objects'])
+        return len(self.__dict__['store'])
 
-    def __deepcopy__(self, memo):
-        kwargs = self.serialize()
-        o = type(self)(self.cls, self.key)
-        o.deserialize(kwargs)
-        return o
+    def __iter__(self):
+        return iter(self.__dict__['store'])
 
-    def add(self, obj):
-        assert isinstance(obj, self.cls)
-        key = getattr(obj, self.key)
-        if key not in self:
-            self[key] = obj
-
-    def new(self, **kwargs):
+    def new(self, _key, **kwargs):
         try:
-            if kwargs[self.key] in self:
+            if kwargs[_key] in self:
                 raise ValueError("item already exists")
         except KeyError:
-            raise ValueError("missing required argument: {}".format(self.key))
-
-        obj = self.cls(**kwargs)
-        self.add(obj)
-
-        return obj
+            obj = self.cls(**kwargs)
+            self[_key] = obj
+            return obj
 
     def __setstate__(self, ds):
         assert isinstance(ds, dict)
         for key, value in iteritems(ds):
             if not value:
                 value = {}
-            value[self.key] = key
-            self.new(**value)
+            self.new(key, **value)
 
     deserialize = __setstate__
 
     def __getstate__(self):
         obj = {}
-        for key, value in iteritems(self.objects):
+        for key, value in iteritems(self.store):
             if hasattr(value, 'serialize'):
                 obj[key] = value.serialize()
             else:

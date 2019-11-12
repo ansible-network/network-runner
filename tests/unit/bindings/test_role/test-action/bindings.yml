@@ -1,0 +1,18 @@
+---
+validators:
+  choice: { type: choice, choices: ['one', 'two'] }
+
+models:
+  model:
+    name: { type: str }
+
+actions:
+  method:
+    args:
+      string: { type: str }
+      integer: { type: int }
+      boolean: { type: bool }
+      alist: { type: list }
+      adict: { type: dict}
+      valid: { validators: ['choice'], choices: ['one', 'two'] }
+      model: { type: model }

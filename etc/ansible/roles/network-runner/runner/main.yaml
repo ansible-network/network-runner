@@ -1,0 +1,42 @@
+---
+validators:
+  vlan_id: { type: range, minval: 1, maxval: 4094 }
+
+models:
+  vlan:
+    vlan_id: { type: int, required: True, validators: vlan_id }
+    vlan_name: { type: str }
+
+actions:
+  create_vlan:
+    args:
+      vlan_id: { type: int, required: True, validators: vlan_id }
+      vlan_name: { type: str }
+    vars:
+      network_action: create_vlan
+
+  delete_vlan:
+    args:
+      vlan_id: { type: int, required: True, validators: vlan_id}
+    vars:
+      network_action: delete_vlan
+
+  delete_port:
+    args:
+      port_name: { type: str, required: True }
+    vars:
+      network_action: delete_port
+
+  conf_trunk_port:
+    args:
+      port_name: { type: str, required: True }
+      port_description: { type: str, required: True }
+    vars:
+      network_action: conf_trunk_port
+
+  conf_access_port:
+    args:
+      port_name: { type: str, required: True }
+      port_description: { type: str, required: True }
+    vars:
+      network_action: conf_access_port

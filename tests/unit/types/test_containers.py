@@ -15,17 +15,17 @@
 import pytest
 
 from network_runner.types.objects import Object
-from network_runner.types.attrs import Attribute
+from network_runner.types.attrs import String
 from network_runner.types.containers import Index, Map
 
 
 class ListItem(Object):
-    name = Attribute()
+    name = String()
 
 
 class DictItem(Object):
-    name = Attribute()
-    value = Attribute()
+    name = String()
+    value = String()
 
 
 def test_index():

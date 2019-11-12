@@ -17,8 +17,7 @@
 # under the License.
 #
 from network_runner.types.objects import Object
-from network_runner.types.attrs import Attribute
-from network_runner.types.attrs import Container
+from network_runner.types.attrs import String, Dict, TypedList, Boolean
 from network_runner.types.containers import Index
 
 from network_runner.types.attrs import SERIALIZE_WHEN_PRESENT
@@ -26,51 +25,48 @@ from network_runner.types.attrs import SERIALIZE_WHEN_PRESENT
 
 class Base(object):
 
-    connection = Attribute(serialize_when=SERIALIZE_WHEN_PRESENT)
+    connection = String(
+        serialize_when=SERIALIZE_WHEN_PRESENT
+    )
 
 
 class Task(Base, Object):
 
-    name = Attribute(
+    name = String(
         serialize_when=SERIALIZE_WHEN_PRESENT
     )
 
-    action = Attribute(
+    action = String(
         required=True
     )
 
-    args = Attribute(
-        type='dict'
-    )
+    args = Dict()
 
-    vars = Attribute(
-        type='dict',
+    vars = Dict(
         serialize_when=SERIALIZE_WHEN_PRESENT
     )
 
-    when = Attribute(
+    when = String(
         serialize_when=SERIALIZE_WHEN_PRESENT
     )
 
 
 class Play(Base, Object):
 
-    name = Attribute(
+    name = String(
         serialize_when=SERIALIZE_WHEN_PRESENT
     )
 
-    hosts = Attribute(
+    hosts = String(
         default='all'
     )
 
-    gather_facts = Attribute(
-        type='bool',
+    gather_facts = Boolean(
         serialize_when=SERIALIZE_WHEN_PRESENT
     )
 
-    tasks = Container(
-        type='index',
-        cls=Task
+    tasks = TypedList(
+        item_class=Task
     )
 
 

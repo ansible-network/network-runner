@@ -18,7 +18,7 @@ from network_runner.types import attrs
 from network_runner.types.objects import Object
 from network_runner.types.attrs import Attribute
 from network_runner.types.attrs import String, Integer, Boolean, List, Dict
-from network_runner.types.attrs import Map, Index
+from network_runner.types.attrs import Map, Index, Any
 from network_runner.types.containers import MapContainer
 from network_runner.types.containers import IndexContainer
 
@@ -96,18 +96,33 @@ def test_call_dict_with_default_value():
     assert z == default_value
 
 
-def test_typeddict_container():
+def test_map_container():
     c = Map(Item, 'name')
     assert isinstance(c, Map)
     r = c(None)
     assert isinstance(r, MapContainer)
 
 
-def test_typedlist_container():
+def test_index_container():
     c = Index(Item)
     assert isinstance(c, Index)
     r = c(None)
     assert isinstance(r, IndexContainer)
+
+
+def test_any():
+    c = Any(object)
+    assert isinstance(c, Any)
+    r = c('test')
+    assert isinstance(r, str)
+    r = c(1)
+    assert isinstance(r, int)
+    r = c(True)
+    assert isinstance(r, bool)
+    r = c(list())
+    assert isinstance(r, list)
+    r = c({})
+    assert isinstance(r, dict)
 
 
 def test_enums():

@@ -51,7 +51,7 @@ ATTR_TYPE_MAP = {
     'dict': attrs.Dict,
     'map': attrs.Map,
     'index': attrs.Index,
-    'dject': attrs.Object,
+    'any': attrs.Any,
     None: attrs.String
 }
 

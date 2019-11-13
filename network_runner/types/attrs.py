@@ -112,13 +112,13 @@ class Dict(Attribute):
         super(Dict, self).__init__(type=dict, **kwargs)
 
 
-class Object(Attribute):
+class Any(Attribute):
 
     def __init__(self, type, **kwargs):
         if kwargs.get('default') is None:
-            kwargs['default'] = type()
+            kwargs['default'] = None
         kwargs['type'] = type
-        super(Object, self).__init__(**kwargs)
+        super(Any, self).__init__(**kwargs)
 
 
 class Map(Attribute):

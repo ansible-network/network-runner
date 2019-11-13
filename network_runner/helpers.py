@@ -24,9 +24,6 @@ from subprocess import Popen, PIPE
 
 from six import binary_type
 
-from yaml import safe_load
-
-from network_runner.exceptions import NetworkRunnerException
 
 PYTHON_RESERVED = frozenset([
     'and', 'assert', 'in', 'del', 'else', 'raise', 'from', 'if', 'continue',
@@ -153,25 +150,3 @@ def get_role_path(name):
         for parent, children, _ in os.walk(item):
             if name in children:
                 return os.path.join(parent, name)
-
-
-def get_role_bindings(path):
-    """Returns the role bindings
-
-    This function will return the role bindings dictionary if it
-    exists in the role specified by `path` otherwise this
-    function will generate an exception.
-
-    :param path: the full path to the role
-    :type path: str
-
-    :returns: the runner spec as a dictionary
-    :rtype: dict
-
-    :raises: NetworkRunnerException
-    """
-    for ext in ('yaml', 'yml'):
-        fullpath = os.path.join(to_text(path), 'meta/bindings.{}'.format(ext))
-        if os.path.exists(fullpath):
-            return safe_load(open(fullpath))
-    raise NetworkRunnerException("role bindings not found")

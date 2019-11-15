@@ -16,6 +16,8 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+from six import iteritems
+
 from network_runner.types.objects import Object
 from network_runner.types.containers import IndexContainer
 from network_runner.types.attrs import String, Dict, Index, Boolean
@@ -50,6 +52,27 @@ class Task(Base, Object):
     when = String(
         serialize_when=SERIALIZE_WHEN_PRESENT
     )
+
+    def __init__(self, **kwargs):
+        kwargs = self._injest_task(kwargs)
+        super(Task, self).__init__(**kwargs)
+
+    def _injest_task(self, kwargs):
+        newargs = {}
+        if 'action' not in list(kwargs):
+            for key in self._attributes:
+                value = kwargs.pop(key, None)
+                if value is not None:
+                    newargs[key] = value
+
+            assert len(kwargs) == 1
+
+            for action, args in iteritems(kwargs):
+                newargs.update({'action': action, 'args': args})
+        return newargs or kwargs
+
+    def deserialize(self, ds):
+        super(Task, self).deserialize(self._injest_task(ds))
 
 
 class Role(Object):

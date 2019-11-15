@@ -29,6 +29,3 @@ def test_print_json(capsys):
     utils.print_json(test)
     out, err = capsys.readouterr()
     assert out.strip() == json.dumps(test.serialize(), indent=4).strip()
-
-
-

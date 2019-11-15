@@ -1,3 +1,82 @@
 ---
-- fail:
-    msg: Trunk port configuration is not implimented for nxos
+- name: "nxos: get current status of the port"
+  nxos_command:
+    commands:
+      - "show interface {{ port_name }} switchport | json"
+      - "show interface {{ port_name }} | json"
+      - "show running-config"
+  register: output
+  connection: network_cli
+
+- name: "nxos: set port facts"
+  set_fact:
+    switchport: "{{ output.stdout[0].TABLE_interface.ROW_interface }}"
+    interface: "{{ output.stdout[1].TABLE_interface.ROW_interface }}"
+
+- name: "nxos: Parse switch output to get list of trunk vlans"
+  vars:
+    all_trunk_vlans: []
+  block:
+    - name: "iterate over ranges"
+      set_fact:
+        all_trunk_vlans: "{{ all_trunk_vlans }}"
+      when: t_vlan_range.find("-") != -1
+      with_items: "{{ switchport.trunk_vlans.split(',') }}"
+      loop_control:
+        loop_var: t_vlan_range
+
+    - name: "add single vlans"
+      set_fact:
+        all_trunk_vlans: "{{ all_trunk_vlans }} + ['{{ t_vlan }}']"
+      when: t_vlan.find("-") == -1
+      with_items: "{{ switchport.trunk_vlans.split(',') }}"
+      loop_control:
+        loop_var: t_vlan
+
+    - name: "all the trunk vlans"
+      debug:
+        var: all_trunk_vlans
+
+- name: "nxos: Configure trunk port"
+  block:
+    - name: "nxos: reset interface to defaults"
+      nxos_config:
+        lines: "default interface {{ port_name }}"
+      when: switchport.switchport == 'Disabled' or switchport.oper_mode != 'trunk'
+
+    - name: "nxos: Set switchport oper_mode to trunk"
+      nxos_config:
+        lines:
+          - "switchport"
+          - "switchport mode trunk"
+          - "switchport trunk allowed vlan none"
+          - "description {{ port_description }}"
+        parents: ["interface {{ port_name }}"]
+        running_config: "{{ output.stdout[2] }}"
+      when: switchport.oper_mode != 'trunk'
+
+    - name: "nxos: administratively enable the port"
+      nxos_config:
+        lines: "no shutdown"
+        parents: ["interface {{ port_name }}"]
+      when: interface.admin_state == 'down'
+
+    - name: "nxos: add trunk vlan"
+      nxos_config:
+        lines:
+          - "switchport trunk allowed vlan add {{t_vlan}}"
+        parents: ["interface {{ port_name }}"]
+        running_config: "{{ output.stdout[2] }}"
+      with_items: "{% for vlan in trunked_vlans %} {{ vlan }}{% endfor %}"
+      loop_control:
+        loop_var: t_vlan
+
+    - name: "nxos: set native vlan"
+      nxos_config:
+        lines:
+          - "switchport trunk native vlan {{ _vlan_id }}"
+        parents: ["interface {{ port_name }}"]
+        running_config: "{{ output.stdout[2] }}"
+      when: switchport.native_vlan != _vlan_id
+  connection: network_cli
+

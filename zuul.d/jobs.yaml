@@ -6,5 +6,5 @@
 
 - job:
     name: network-runner-test-functional-junos
-    parent: ansible-network-junos-appliance
+    parent: ansible-network-junos-vsrx-appliance
     run: tests/run.yaml

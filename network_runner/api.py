@@ -40,6 +40,19 @@ class NetworkRunner(object):
             assert isinstance(inventory, Inventory)
         self.inventory = inventory or Inventory()
 
+    def has_host(self, host):
+        """Check if given host is in the inventory
+
+        :param host: Name or ansible host of ```Host```
+        :type host: String
+
+        :returns: Boolean
+        """
+        for n, h in self.inventory.hosts.items():
+            if h.ansible_host == host or n == host:
+                return True
+        return False
+
     def add_host(self, host):
         """Add host to inventory
 

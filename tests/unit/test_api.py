@@ -23,6 +23,30 @@ from network_runner.api import NetworkRunner
 from . import base
 
 
+class TestGetHost(base.BaseTestCase):
+
+    def test_get_host(self):
+        host = Host(name='test')
+        api = NetworkRunner()
+        api.add_host(host)
+        ret = api.has_host('test')
+        self.assertTrue(ret)
+
+    def test_get_host_fail(self):
+        host = Host(name='test1')
+        api = NetworkRunner()
+        api.add_host(host)
+        ret = api.has_host('test')
+        self.assertFalse(ret)
+
+    def test_get_host_by_ansible_host(self):
+        host = Host(name='test1', ansible_host='test2')
+        api = NetworkRunner()
+        api.add_host(host)
+        ret = api.has_host('test2')
+        self.assertTrue(ret)
+
+
 class TestAddHost(base.BaseTestCase):
 
     def test_add_host(self):

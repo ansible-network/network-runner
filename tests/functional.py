@@ -6,6 +6,7 @@ from network_runner import api
 from network_runner.models.inventory import Inventory
 
 TRUNK_SUPPORT = ('cumulus', 'eos', 'junos', 'openvswitch')
+STP_EDGE_SUPPORT = ('nxos')
 PORTS = {
     'cumulus': 'swp1',
     'eos': 'Ethernet1',
@@ -13,6 +14,9 @@ PORTS = {
     'junos': 'xe-0/0/1',
     'openvswitch': 'testport',
     }
+PORTS2 = {
+    'nxos': 'Eth1/2',
+}
 
 HOSTNAME = 'eos-4.20.10'
 HOSTNAME = 'appliance'
@@ -49,7 +53,7 @@ def get_inv_yaml(args):
     return hosts
 
 
-def run_tests(inventory, hostname, port, trunk=False):
+def run_tests(inventory, hostname, port, trunk=False, edge=False):
     # TODO(radez) Use a testing framework to verify
 
     net_runr = api.NetworkRunner(inventory)
@@ -58,9 +62,18 @@ def run_tests(inventory, hostname, port, trunk=False):
 
     # ## Configure an access port
     net_runr.conf_access_port(hostname, port, VLAN)
+
     # ## configure a trunk port
     if trunk:
         net_runr.conf_trunk_port(hostname, port, VLAN, T_VLANS)
+
+    if edge:
+        # ## Configure an access port
+        net_runr.conf_access_port(hostname, port, VLAN, edge=edge)
+
+        # ## configure a trunk port
+        if trunk:
+            net_runr.conf_trunk_port(hostname, port, VLAN, T_VLANS, edge=edge)
 
     # ## delete a port
     net_runr.delete_port(hostname, port)
@@ -82,7 +95,9 @@ def main():
     inventory.deserialize(inv_yaml)
 
     # execute the tests
-    run_tests(inventory, hostname, port, net_os in TRUNK_SUPPORT)
+    run_tests(inventory, hostname, port,
+              net_os in TRUNK_SUPPORT,
+              net_os in STP_EDGE_SUPPORT)
 
 
 if __name__ == "__main__":

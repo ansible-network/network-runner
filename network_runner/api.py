@@ -125,7 +125,7 @@ class NetworkRunner(object):
         """
         return self.play('delete_vlan', hostname, {'vlan_id': vlan_id})
 
-    def conf_access_port(self, hostname, port, vlan_id):
+    def conf_access_port(self, hostname, port, vlan_id, **kwargs):
         """Configure access port on a vlan.
 
         :param hostname: The name of the host in Ansible inventory.
@@ -134,9 +134,14 @@ class NetworkRunner(object):
                         An empty or None value will default to the
                         target device's default VLAN assignment. This
                         default is assigned in the ansible role.
+        :param kwargs: used to pass platform specific parameters into
+                       the ansible roles. For example immediate STP
+                       fwding state is named different things on different
+                       platforms.
         """
         variables = {'vlan_id': vlan_id, 'port_name': port,
                      'port_description': port}
+        variables.update(kwargs)
         return self.play('conf_access_port', hostname, variables)
 
     def conf_trunk_port(self, hostname, port, vlan_id, trunked_vlans):

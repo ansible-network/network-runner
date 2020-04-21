@@ -125,7 +125,7 @@ class NetworkRunner(object):
         """
         return self.play('delete_vlan', hostname, {'vlan_id': vlan_id})
 
-    def conf_access_port(self, hostname, port, vlan_id):
+    def conf_access_port(self, hostname, port, vlan_id, portfast=False):
         """Configure access port on a vlan.
 
         :param hostname: The name of the host in Ansible inventory.
@@ -136,7 +136,7 @@ class NetworkRunner(object):
                         default is assigned in the ansible role.
         """
         variables = {'vlan_id': vlan_id, 'port_name': port,
-                     'port_description': port}
+                     'port_description': port, 'port_fast': portfast}
         return self.play('conf_access_port', hostname, variables)
 
     def conf_trunk_port(self, hostname, port, vlan_id, trunked_vlans):

@@ -50,6 +50,15 @@
         running_config: "{{ output.stdout[2] }}"
       connection: network_cli
 
+    - name: "nxos: enable portfast"
+      nxos_config:
+        lines:
+          - "spanning-tree portfast"
+        parents: ["interface {{ port_name }}"]
+        running_config: "{{ output.stdout[2] }}"
+      when: port_fast
+      connection: network_cli
+
     - name: "nxos: administratively enable the port"
       nxos_config:
         lines: "no shutdown"

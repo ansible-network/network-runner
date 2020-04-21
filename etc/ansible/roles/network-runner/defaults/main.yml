@@ -6,3 +6,7 @@ trunked_vlans: "{{ trunked_vlans }}"
 #
 port_name: "{{ port_name }}"
 port_description: "{{ port_description }}"
+
+# portfast handling
+#
+portfast: False

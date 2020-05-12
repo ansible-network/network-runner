@@ -4,6 +4,7 @@
       jobs:
         - network-runner-test-functional-eos
         - network-runner-test-functional-junos
+        - network-runner-test-functional-nxos
     gate:
       jobs:
         - network-runner-test-functional-eos

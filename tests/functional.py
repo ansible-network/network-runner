@@ -9,6 +9,7 @@ TRUNK_SUPPORT = ('cumulus', 'eos', 'junos', 'openvswitch')
 PORTS = {
     'cumulus': 'swp1',
     'eos': 'Ethernet1',
+    'nxos': 'Eth1/1',
     'junos': 'xe-0/0/1',
     'openvswitch': 'testport',
     }

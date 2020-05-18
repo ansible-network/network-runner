@@ -64,6 +64,15 @@
         parents: ["interface {{ port_name }}"]
       when: interface.admin_state == 'down'
 
+    - name: "nxos: enable STP edge"
+      nxos_config:
+        lines:
+          - "spanning-tree port type edge trunk"
+        parents: ["interface {{ port_name }}"]
+        running_config: "{{ output.stdout[2] }}"
+      when: stp_edge
+      connection: network_cli
+
     - name: "nxos: add trunk vlan"
       nxos_config:
         lines:

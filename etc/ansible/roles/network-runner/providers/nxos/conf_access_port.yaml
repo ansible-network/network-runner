@@ -50,6 +50,15 @@
         running_config: "{{ output.stdout[2] }}"
       connection: network_cli
 
+    - name: "nxos: enable STP edge"
+      nxos_config:
+        lines:
+          - "spanning-tree port type edge"
+        parents: ["interface {{ port_name }}"]
+        running_config: "{{ output.stdout[2] }}"
+      when: stp_edge
+      connection: network_cli
+
     - name: "nxos: administratively enable the port"
       nxos_config:
         lines: "no shutdown"

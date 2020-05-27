@@ -18,6 +18,7 @@ import unittest
 
 from network_runner import api
 from network_runner.models.inventory import Inventory
+from network_runner.models.playbook import Playbook
 
 
 class BaseTestCase(unittest.TestCase):
@@ -38,5 +39,9 @@ class NetworkRunnerTestCase(BaseTestCase):
         self.testvlan = 37
         self.testvlans = [73, 7, 3]
 
-        inventory = Inventory()
-        self.net_runr = api.NetworkRunner(inventory=inventory)
+        self.inventory = Inventory()
+        self.net_runr = api.NetworkRunner(inventory=self.inventory)
+
+        pb = Playbook()
+        self.play = pb.new(hosts=(self.testhost), gather_facts=False)
+        self.task = self.play.tasks.new(action=api.IMPORT_ROLE)

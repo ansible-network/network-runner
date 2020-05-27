@@ -25,8 +25,14 @@ from network_runner.models.playbook import Playbook
 from network_runner.models.inventory import Inventory
 from network_runner.models.inventory import Host
 
+ALL = 'all'
 IMPORT_ROLE = 'import_role'
 NETWORK_RUNNER = 'network-runner'
+CREATE_VLAN = 'create_vlan'
+DELETE_VLAN = 'delete_vlan'
+CONF_ACCESS_PORT = 'conf_access_port'
+CONF_TRUNK_PORT = 'conf_trunk_port'
+DELETE_PORT = 'delete_port'
 
 
 class NetworkRunner(object):
@@ -98,7 +104,7 @@ class NetworkRunner(object):
         :rtype: AnsibleRunner
         """
         pb = Playbook()
-        play = pb.new(hosts=(hosts or 'all'), gather_facts=False)
+        play = pb.new(hosts=(hosts or ALL), gather_facts=False)
 
         task = play.tasks.new(action=IMPORT_ROLE)
         task.args = {'name': NETWORK_RUNNER, 'tasks_from': tasks_from}
@@ -107,7 +113,7 @@ class NetworkRunner(object):
 
         return self.run(pb)
 
-    def create_vlan(self, hostname, vlan_id, vlan_name=None):
+    def create_vlan(self, hostname, vlan_id, vlan_name=None, **kwargs):
         """Create VLAN.
 
         :param hostname: The name of the host in Ansible inventory.
@@ -115,15 +121,18 @@ class NetworkRunner(object):
         :param vlan_name: The VLAN's name/description.
         """
         variables = {'vlan_id': vlan_id, 'vlan_name': vlan_name}
-        return self.play('create_vlan', hostname, variables)
+        variables.update(kwargs)
+        return self.play(CREATE_VLAN, hostname, variables)
 
-    def delete_vlan(self, hostname, vlan_id):
+    def delete_vlan(self, hostname, vlan_id, **kwargs):
         """Delete VLAN.
 
         :param hostname: The name of the host in Ansible inventory.
         :param vlan_id: The VLAN's ID to delete.
         """
-        return self.play('delete_vlan', hostname, {'vlan_id': vlan_id})
+        variables = {'vlan_id': vlan_id}
+        variables.update(kwargs)
+        return self.play(DELETE_VLAN, hostname, variables)
 
     def conf_access_port(self, hostname, port, vlan_id, **kwargs):
         """Configure access port on a vlan.
@@ -142,9 +151,10 @@ class NetworkRunner(object):
         variables = {'vlan_id': vlan_id, 'port_name': port,
                      'port_description': port}
         variables.update(kwargs)
-        return self.play('conf_access_port', hostname, variables)
+        return self.play(CONF_ACCESS_PORT, hostname, variables)
 
-    def conf_trunk_port(self, hostname, port, vlan_id, trunked_vlans):
+    def conf_trunk_port(self, hostname, port, vlan_id,
+                        trunked_vlans, **kwargs):
         """Configure trunk port w/ default vlan and optional additional vlans
 
         :param hostname: The name of the host in Ansible inventory.
@@ -155,15 +165,22 @@ class NetworkRunner(object):
                         default is assigned in the ansible role.
         :param trunked_vlans: A list of VLAN IDs to add to the port in
                               addition to the default VLAN.
+        :param kwargs: used to pass platform specific parameters into
+                       the ansible roles. For example immediate STP
+                       fwding state is named different things on different
+                       platforms.
         """
         variables = {'vlan_id': vlan_id, 'port_name': port,
                      'port_description': port, 'trunked_vlans': trunked_vlans}
-        return self.play('conf_trunk_port', hostname, variables)
+        variables.update(kwargs)
+        return self.play(CONF_TRUNK_PORT, hostname, variables)
 
-    def delete_port(self, hostname, port):
+    def delete_port(self, hostname, port, **kwargs):
         """Delete port configuration.
 
         :param hostname: The name of the host in Ansible inventory.
         :param port: The port to configure.
         """
-        return self.play('delete_port', hostname, {'port_name': port})
+        variables = {'port_name': port}
+        variables.update(kwargs)
+        return self.play(DELETE_PORT, hostname, variables)

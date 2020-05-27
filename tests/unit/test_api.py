@@ -15,12 +15,17 @@
 
 import mock
 
+from network_runner import api
 from network_runner import exceptions
 from network_runner.models import playbook
 from network_runner.models.inventory import Host
 from network_runner.api import NetworkRunner
 
 from . import base
+
+
+def m_run(self):
+    return {'status': 'success'}
 
 
 class TestGetHost(base.BaseTestCase):
@@ -112,19 +117,37 @@ class TestPlay(base.NetworkRunnerTestCase):
         m_ans_runner.run.assert_called_once()
 
 
-@mock.patch('network_runner.api.NetworkRunner.run')
+@mock.patch('network_runner.api.ansible_runner')
 class TestConfAccessPort(base.NetworkRunnerTestCase):
 
-    def test_assign_access_port(self, m_run_task):
+    def test_assign_access_port(self, m_ans_runner):
+        m_result = m_ans_runner.run.return_value
+        m_result.status = 'success'
+        m_result.stats = []
         self.net_runr.conf_access_port(self.testhost,
                                        self.testport,
                                        self.testvlan)
-        m_run_task.assert_called_once()
+        m_ans_runner.run.assert_called_once()
 
-    def test_remove_access_port(self, m_run_task):
+    def test_assign_access_port_w_stp_edge(self, m_ans_runner):
+        m_result = m_ans_runner.run.return_value
+        m_result.status = 'success'
+        m_result.stats = []
+        self.net_runr.conf_access_port(self.testhost,
+                                       self.testport,
+                                       self.testvlan,
+                                       stp_edge=True)
+        # TODO: this should be run like this
+        #       assert_called_once_with(stp_edge=True)
+        m_ans_runner.run.assert_called_once()
+
+    def test_remove_access_port(self, m_ans_runner):
+        m_result = m_ans_runner.run.return_value
+        m_result.status = 'success'
+        m_result.stats = []
         self.net_runr.delete_port(self.testhost, self.testport)
 
-        m_run_task.assert_called_once()
+        m_ans_runner.run.assert_called_once()
 
     def test_remove_access_port_raises(self, m_run_task):
         m_run_task.side_effect = exceptions.NetworkRunnerException('test')
@@ -133,21 +156,49 @@ class TestConfAccessPort(base.NetworkRunnerTestCase):
                           self.testhost, self.testport)
 
 
-@mock.patch('network_runner.api.NetworkRunner.run')
+@mock.patch('network_runner.api.ansible_runner')
 class TestConfTrunkPort(base.NetworkRunnerTestCase):
 
-    def test_assign_trunk_port(self, m_run_task):
+    def test_assign_trunk_port(self, m_ans_runner):
+        m_result = m_ans_runner.run.return_value
+        m_result.status = 'success'
+        m_result.stats = []
         self.net_runr.conf_trunk_port(self.testhost,
                                       self.testport,
                                       self.testvlan,
                                       trunked_vlans=self.testvlans)
 
-        m_run_task.assert_called_once()
+        m_ans_runner.run.assert_called_once()
 
-    def test_remove_trunk_port(self, m_run_task):
+    def test_assign_trunk_port_w_stp_edge(self, m_ans_runner):
+        m_result = m_ans_runner.run.return_value
+        m_result.status = 'success'
+        m_result.stats = []
+        self.net_runr.conf_trunk_port(self.testhost,
+                                      self.testport,
+                                      self.testvlan,
+                                      trunked_vlans=self.testvlans,
+                                      stp_edge=True)
+
+        self.task.args = {'name': api.NETWORK_RUNNER,
+                          'tasks_from': api.CONF_TRUNK_PORT}
+        self.task.vars = {'vlan_id': self.testvlan,
+                          'port_name': self.testport,
+                          'port_description': self.testport,
+                          'trunked_vlans': self.testvlans,
+                          'stp_edge': True}
+
+        # TODO: this should be run like this
+        #       assert_called_once_with(stp_edge=True)
+        m_ans_runner.run.assert_called_once()
+
+    def test_remove_trunk_port(self, m_ans_runner):
+        m_result = m_ans_runner.run.return_value
+        m_result.status = 'success'
+        m_result.stats = []
         self.net_runr.delete_port(self.testhost, self.testport)
 
-        m_run_task.assert_called_once()
+        m_ans_runner.run.assert_called_once()
 
     def test_remove_trunk_port_raises(self, m_run_task):
         m_run_task.side_effect = exceptions.NetworkRunnerException('test')

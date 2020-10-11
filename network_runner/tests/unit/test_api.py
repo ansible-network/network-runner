@@ -179,3 +179,15 @@ class TestConfTrunkPort(base.NetworkRunnerTestCase):
         args, kwargs = m_run_task.call_args_list[0]
         task = args[0][0].tasks[0]
         self.assertEqual(task.vars['mykwarg'], 'no-val')
+
+
+@mock.patch('network_runner.api.NetworkRunner.run')
+class TestListVlans(base.NetworkRunnerTestCase):
+
+    def test_list_vlans(self, m_run_task):
+        self.net_runr.list_vlans(self.testhost)
+        m_run_task.assert_called_once()
+
+    def test_list_vlans_w_kwarg(self, m_run_task):
+        self.net_runr.list_vlans(self.testhost, mykwarg='noval')
+        m_run_task.assert_called_once()

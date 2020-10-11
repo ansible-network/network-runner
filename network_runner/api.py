@@ -103,6 +103,30 @@ class NetworkRunner(object):
 
         return self.run(playbook)
 
+    def list_vlans(self, hostname, **kwargs):
+        """List VLANs.
+
+        :param hostname: The name of the host in Ansible inventory.
+        """
+        play = Play(name='List VLANs',
+                    hosts=hostname,
+                    gather_facts=False)
+
+        variables = {}
+        variables.update(kwargs)
+        task = Task(name='List VLANs',
+                    module=IMPORT_ROLE,
+                    args={'name': NETWORK_RUNNER,
+                          'tasks_from': 'list_vlans'},
+                    vars=variables)
+
+        play.tasks.add(task)
+
+        playbook = Playbook()
+        playbook.add(play)
+
+        return self.run(playbook)
+
     def delete_vlan(self, hostname, vlan_id, **kwargs):
         """Delete VLAN.
 

@@ -20,8 +20,20 @@ from network_runner.resources import Entity, KeyedCollection
 from network_runner.resources.attributes import Attribute
 from network_runner.resources.validators import ChoiceValidator
 
-net_os_validator = ChoiceValidator(choices=('cumulus', 'dellos10', 'eos',
-                                            'junos', 'nxos', 'openvswitch'))
+# Build the list of platform modules in the role providers directory
+import os
+RP_DEFAULT = '/usr/share/ansible/roles:/etc/ansible/roles:etc/ansible/roles'
+ROLE_PATH = os.environ.get('ANSIBLE_ROLES_PATH', RP_DEFAULT).split(':')
+PROVIDERS = []
+for i in ROLE_PATH:
+    net_runner_path = os.path.sep.join([i, 'network-runner'])
+    if os.path.exists(net_runner_path):
+        provider_path = os.path.sep.join([net_runner_path, 'providers'])
+        PROVIDERS.extend(os.listdir(provider_path))
+        break  # assume one installation of network-runner
+
+# Create a validator from the providers list
+net_os_validator = ChoiceValidator(choices=(PROVIDERS))
 
 
 class Host(Entity):

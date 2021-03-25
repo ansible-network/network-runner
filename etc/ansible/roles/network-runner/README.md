@@ -34,7 +34,7 @@ Example Playbook
         vlan_name: v101
         vlan_id: 101
 
-    - name: do create_vlan
+    - name: do delete_vlan
       import_role:
         name: network-runner
         tasks_from: delete_vlan

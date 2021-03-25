@@ -30,6 +30,7 @@ IMPORT_ROLE = 'import_role'
 NETWORK_RUNNER = 'network-runner'
 CREATE_VLAN = 'create_vlan'
 DELETE_VLAN = 'delete_vlan'
+LIST_VLANS = 'list_vlans'
 CONF_ACCESS_PORT = 'conf_access_port'
 CONF_TRUNK_PORT = 'conf_trunk_port'
 DELETE_PORT = 'delete_port'
@@ -123,6 +124,14 @@ class NetworkRunner(object):
         variables = {'vlan_id': vlan_id, 'vlan_name': vlan_name}
         variables.update(kwargs)
         return self.play(CREATE_VLAN, hostname, variables)
+
+    def list_vlans(self, hostname, **kwargs):
+        """List VLANs.
+
+        :param hostname: The name of the host in Ansible inventory.
+        """
+        variables = kwargs
+        return self.play(LIST_VLANS, hostname, variables)
 
     def delete_vlan(self, hostname, vlan_id, **kwargs):
         """Delete VLAN.

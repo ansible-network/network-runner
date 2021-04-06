@@ -216,3 +216,26 @@ class TestListVlans(base.NetworkRunnerTestCase):
         self.net_runr.list_vlans(self.testhost)
 
         m_ans_runner.run.assert_called_once()
+
+
+@mock.patch('network_runner.api.ansible_runner')
+class TestAddDeleteTrunkVlan(base.NetworkRunnerTestCase):
+    def test_add_trunk_vlan(self, m_ans_runner):
+        m_result = m_ans_runner.run.return_value
+        m_result.status = 'success'
+        m_result.stats = []
+        self.net_runr.add_trunk_vlan(self.testhost,
+                                     self.testport,
+                                     self.testvlan)
+
+        m_ans_runner.run.assert_called_once()
+
+    def test_delete_trunk_vlan(self, m_ans_runner):
+        m_result = m_ans_runner.run.return_value
+        m_result.status = 'success'
+        m_result.stats = []
+        self.net_runr.delete_trunk_vlan(self.testhost,
+                                        self.testport,
+                                        self.testvlan)
+
+        m_ans_runner.run.assert_called_once()

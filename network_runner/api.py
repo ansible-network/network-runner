@@ -33,6 +33,8 @@ DELETE_VLAN = 'delete_vlan'
 LIST_VLANS = 'list_vlans'
 CONF_ACCESS_PORT = 'conf_access_port'
 CONF_TRUNK_PORT = 'conf_trunk_port'
+ADD_TRUNK_VLAN = 'add_trunk_vlan'
+DELETE_TRUNK_VLAN = 'delete_trunk_vlan'
 DELETE_PORT = 'delete_port'
 
 
@@ -183,6 +185,28 @@ class NetworkRunner(object):
                      'port_description': port, 'trunked_vlans': trunked_vlans}
         variables.update(kwargs)
         return self.play(CONF_TRUNK_PORT, hostname, variables)
+
+    def add_trunk_vlan(self, hostname, port, vlan_id, **kwargs):
+        """Add VLAN to trunk port.
+
+        :param hostname: The name of the host in Ansible inventory.
+        :param port: The port to configure.
+        :param vlan_id: The VLAN's ID to delete.
+        """
+        variables = {'vlan_id': vlan_id, 'port_name': port}
+        variables.update(kwargs)
+        return self.play(ADD_TRUNK_VLAN, hostname, variables)
+
+    def delete_trunk_vlan(self, hostname, port, vlan_id, **kwargs):
+        """Delete VLAN.
+
+        :param hostname: The name of the host in Ansible inventory.
+        :param port: The port to configure.
+        :param vlan_id: The VLAN's ID to delete.
+        """
+        variables = {'vlan_id': vlan_id, 'port_name': port}
+        variables.update(kwargs)
+        return self.play(DELETE_TRUNK_VLAN, hostname, variables)
 
     def delete_port(self, hostname, port, **kwargs):
         """Delete port configuration.

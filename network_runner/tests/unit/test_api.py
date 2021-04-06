@@ -50,6 +50,20 @@ class TestCreateDeleteVlan(base.NetworkRunnerTestCase):
         self.net_runr.delete_vlan(self.testhost, self.testvlan)
         m_run_task.assert_called_once()
 
+    @mock.patch('network_runner.api.NetworkRunner.run')
+    def test_create_vlan_w_kwarg(self, m_run_task):
+        self.net_runr.create_vlan(self.testhost,
+                                  self.testvlan,
+                                  mykwarg='noval')
+        m_run_task.assert_called_once()
+
+    @mock.patch('network_runner.api.NetworkRunner.run')
+    def test_delete_vlan_w_kwarg(self, m_run_task):
+        self.net_runr.delete_vlan(self.testhost,
+                                  self.testvlan,
+                                  mykwarg='noval')
+        m_run_task.assert_called_once()
+
 
 @mock.patch('network_runner.api.ansible_runner')
 class TestRun(base.NetworkRunnerTestCase):
@@ -96,6 +110,29 @@ class TestConfAccessPort(base.NetworkRunnerTestCase):
                           self.net_runr.delete_port,
                           self.testhost, self.testport)
 
+    def test_assign_access_port_w_kwarg(self, m_run_task):
+        self.net_runr.conf_access_port(self.testhost,
+                                       self.testport,
+                                       self.testvlan,
+                                       mykwarg='no-val')
+        m_run_task.assert_called_once()
+
+        # check no-val
+        args, kwargs = m_run_task.call_args_list[0]
+        task = args[0][0].tasks[0]
+        self.assertEqual(task.vars['mykwarg'], 'no-val')
+
+    def test_remove_access_port_w_kwarg(self, m_run_task):
+        self.net_runr.delete_port(self.testhost,
+                                  self.testport,
+                                  mykwarg='no-val')
+        m_run_task.assert_called_once()
+
+        # check no-val
+        args, kwargs = m_run_task.call_args_list[0]
+        task = args[0][0].tasks[0]
+        self.assertEqual(task.vars['mykwarg'], 'no-val')
+
 
 @mock.patch('network_runner.api.NetworkRunner.run')
 class TestConfTrunkPort(base.NetworkRunnerTestCase):
@@ -118,3 +155,27 @@ class TestConfTrunkPort(base.NetworkRunnerTestCase):
         self.assertRaises(exceptions.NetworkRunnerException,
                           self.net_runr.delete_port,
                           self.testhost, self.testport)
+
+    def test_assign_trunk_port_w_kwarg(self, m_run_task):
+        self.net_runr.conf_trunk_port(self.testhost,
+                                      self.testport,
+                                      self.testvlan,
+                                      trunked_vlans=self.testvlans,
+                                      mykwarg='no-val')
+        m_run_task.assert_called_once()
+
+        # check no-val
+        args, kwargs = m_run_task.call_args_list[0]
+        task = args[0][0].tasks[0]
+        self.assertEqual(task.vars['mykwarg'], 'no-val')
+
+    def test_remove_trunk_port_w_kwarg(self, m_run_task):
+        self.net_runr.delete_port(self.testhost,
+                                  self.testport,
+                                  mykwarg='no-val')
+        m_run_task.assert_called_once()
+
+        # check no-val
+        args, kwargs = m_run_task.call_args_list[0]
+        task = args[0][0].tasks[0]
+        self.assertEqual(task.vars['mykwarg'], 'no-val')

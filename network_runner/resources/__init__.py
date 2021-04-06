@@ -88,7 +88,7 @@ class Entity(with_metaclass(EntityMeta)):
         super(Entity, self).__init__()
 
     def __repr__(self):
-        return json.dumps(self.serialize())
+        return str(self.serialize())
 
     def __setattr__(self, key, value):
         if key in self._attributes:
@@ -155,7 +155,7 @@ class Collection(MutableSequence):
         self.items = list()
 
     def __repr__(self):
-        return json.dumps(self.serialize())
+        return str(self.serialize())
 
     def __getitem__(self, index):
         return self.__dict__['items'][index]
@@ -221,7 +221,7 @@ class KeyedCollection(MutableMapping):
         self.objects = {}
 
     def __repr__(self):
-        return json.dumps(self.serialize())
+        return str(self.serialize())
 
     def __getitem__(self, key):
         return self.__dict__['objects'][key]

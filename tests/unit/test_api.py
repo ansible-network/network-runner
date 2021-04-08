@@ -205,3 +205,14 @@ class TestConfTrunkPort(base.NetworkRunnerTestCase):
         self.assertRaises(exceptions.NetworkRunnerException,
                           self.net_runr.delete_port,
                           self.testhost, self.testport)
+
+
+@mock.patch('network_runner.api.ansible_runner')
+class TestListVlans(base.NetworkRunnerTestCase):
+    def test_list_vlans(self, m_ans_runner):
+        m_result = m_ans_runner.run.return_value
+        m_result.status = 'success'
+        m_result.stats = []
+        self.net_runr.list_vlans(self.testhost)
+
+        m_ans_runner.run.assert_called_once()

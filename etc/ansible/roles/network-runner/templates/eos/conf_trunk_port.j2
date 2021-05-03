@@ -1,5 +1,5 @@
-default interface {{ port_name }}
 interface {{ port_name }}
+{% include "clean_config.j2" %}
 {% if port_description %}
 description {{ port_description }}
 {% endif %}

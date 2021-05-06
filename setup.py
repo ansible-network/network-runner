@@ -34,7 +34,7 @@ def main():
 
     setuptools.setup(
         name='network-runner',
-        version='0.3.4',
+        version='0.3.5',
         description='Abstracton and Python API for Ansible Networking',
         long_description=long_description,
         author='Ansible',

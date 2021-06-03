@@ -1,0 +1,23 @@
+---
+- name: "dellemc.os9: reset interface to default"
+  dellemc.os9.os9_config:
+    lines:
+      - "default interface {{ port_name }}"
+  connection: network_cli
+
+- name: "dellemc.os9: enable switchport, rstp, and jumbo frames"
+  dellemc.os9.os9_config:
+    lines:
+      - "interface {{ port_name }}"
+      - "switchport"
+      - "no shutdown"
+      - "spanning-tree rstp edge-port"
+      - "mtu 9216"
+  connection: network_cli
+
+- name: "dellemc.os9: set access mode vlan"
+  dellemc.os9.os9_config:
+    lines:
+      - "interface vlan {{ _vlan_id }}"
+      - "untagged {{ port_name }}"
+  connection: network_cli

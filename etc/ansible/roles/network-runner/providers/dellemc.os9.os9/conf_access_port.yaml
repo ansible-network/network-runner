@@ -5,15 +5,22 @@
       - "default interface {{ port_name }}"
   connection: network_cli
 
-- name: "dellemc.os9: enable switchport, rstp, and jumbo frames"
+- name: "dellemc.os9: enable switchport and jumbo frames"
   dellemc.os9.os9_config:
     lines:
       - "interface {{ port_name }}"
       - "switchport"
       - "no shutdown"
-      - "spanning-tree rstp edge-port"
       - "mtu 9216"
   connection: network_cli
+
+- name: "dellemc.os9: enable rstp"
+  dellemc.os9.os9_config:
+    lines:
+      - "interface {{ port_name }}"
+      - "spanning-tree rstp edge-port"
+  connection: network_cli
+  when: stp_edge
 
 - name: "dellemc.os9: set access mode vlan"
   dellemc.os9.os9_config:

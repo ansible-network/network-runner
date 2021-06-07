@@ -1,0 +1,6 @@
+---
+- name: "dellemc.os9: reset interface to default (no switchport and shutdown)"
+  dellemc.os9.os9_config:
+    lines:
+      - "default interface {{ port_name }}"
+  connection: network_cli

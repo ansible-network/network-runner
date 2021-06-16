@@ -18,7 +18,7 @@
 #
 import json
 
-from collections import MutableMapping, MutableSequence
+from collections.abc import MutableMapping, MutableSequence
 
 from six import iteritems
 

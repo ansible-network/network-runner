@@ -1,0 +1,11 @@
+---
+- name: "fos: delete port"
+  fos_config:
+    lines:
+      - no switchport mode
+      - no switchport trunk allowed vlan
+      - no switchport trunk native vlan
+      - no switchport access vlan
+      - shutdown
+    parents: interface {{ port_name }}
+  connection: network_cli

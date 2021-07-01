@@ -17,8 +17,10 @@
 # under the License.
 #
 import ansible_runner
+import sys
 
 from network_runner import exceptions
+from network_runner.formats import format_port_config
 
 from network_runner.models.playbook import Playbook
 
@@ -36,6 +38,21 @@ CONF_TRUNK_PORT = 'conf_trunk_port'
 ADD_TRUNK_VLAN = 'add_trunk_vlan'
 DELETE_TRUNK_VLAN = 'delete_trunk_vlan'
 DELETE_PORT = 'delete_port'
+GET_PORT_CONF = 'get_port_conf'
+
+
+class __Autonomy__(object):
+    def __init__(self):
+        self._buff = ""
+
+    def write(self, out_stream):
+        self._buff += out_stream
+
+    def buff(self):
+        return self._buff
+
+    def flush(self):
+        return
 
 
 class NetworkRunner(object):
@@ -82,6 +99,7 @@ class NetworkRunner(object):
         # invoke ansible networking via ansible runner
         result = ansible_runner.run(playbook=playbook.serialize(),
                                     inventory=self.inventory.serialize(),
+                                    verbosity=True,
                                     settings={'pexpect_use_poll': False})
 
         # check for failure
@@ -217,3 +235,19 @@ class NetworkRunner(object):
         variables = {'port_name': port}
         variables.update(kwargs)
         return self.play(DELETE_PORT, hostname, variables)
+
+    def get_port_conf(self, hostname, port, **kwargs):
+        """Get port configuration.
+
+        :param hostname: The name of the host in Ansible inventory.
+        :param port: The port to get configuration.
+        """
+        variables = {'port_name': port}
+        variables.update(kwargs)
+        current = sys.stdout
+        a = __Autonomy__()
+        sys.stdout = a
+        self.play(GET_PORT_CONF, hostname, variables)
+        sys.stdout = current
+        return print(format_port_config(a.buff(),
+                     self.inventory.hosts[hostname].ansible_network_os))

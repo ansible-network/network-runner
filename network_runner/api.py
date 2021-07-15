@@ -20,7 +20,7 @@ import ansible_runner
 import sys
 
 from network_runner import exceptions
-from network_runner.formats import format_port_config
+from network_runner import helpers
 
 from network_runner.models.playbook import Playbook
 
@@ -39,20 +39,6 @@ ADD_TRUNK_VLAN = 'add_trunk_vlan'
 DELETE_TRUNK_VLAN = 'delete_trunk_vlan'
 DELETE_PORT = 'delete_port'
 GET_PORT_CONF = 'get_port_conf'
-
-
-class __Autonomy__(object):
-    def __init__(self):
-        self._buff = ""
-
-    def write(self, out_stream):
-        self._buff += out_stream
-
-    def buff(self):
-        return self._buff
-
-    def flush(self):
-        return
 
 
 class NetworkRunner(object):
@@ -236,18 +222,27 @@ class NetworkRunner(object):
         variables.update(kwargs)
         return self.play(DELETE_PORT, hostname, variables)
 
-    def get_port_conf(self, hostname, port, **kwargs):
+    def get_port_conf(self, hostname, port, format=False, **kwargs):
         """Get port configuration.
 
         :param hostname: The name of the host in Ansible inventory.
         :param port: The port to get configuration.
+        :param format: Format the port configuration json
         """
         variables = {'port_name': port}
         variables.update(kwargs)
-        current = sys.stdout
-        a = __Autonomy__()
-        sys.stdout = a
+
+        # output the original port configuration json
+        if not format:
+            self.play(GET_PORT_CONF, hostname, variables)
+            return
+        # format the port configuration json
+        stdout_backup = sys.stdout
+        sys.stdout = helpers.FakeTextIO()
         self.play(GET_PORT_CONF, hostname, variables)
-        sys.stdout = current
-        return print(format_port_config(a.buff(),
-                     self.inventory.hosts[hostname].ansible_network_os))
+        formatter_stdout_data = helpers.format_port_config(
+            sys.stdout.buff(),
+            self.inventory.hosts[hostname].ansible_network_os
+        )
+        sys.stdout = stdout_backup
+        return print(formatter_stdout_data)

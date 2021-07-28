@@ -17,8 +17,10 @@
 # under the License.
 #
 import ansible_runner
+import sys
 
 from network_runner import exceptions
+from network_runner import helpers
 
 from network_runner.models.playbook import Playbook
 
@@ -36,6 +38,7 @@ CONF_TRUNK_PORT = 'conf_trunk_port'
 ADD_TRUNK_VLAN = 'add_trunk_vlan'
 DELETE_TRUNK_VLAN = 'delete_trunk_vlan'
 DELETE_PORT = 'delete_port'
+GET_PORT_CONF = 'get_port_conf'
 
 
 class NetworkRunner(object):
@@ -82,6 +85,7 @@ class NetworkRunner(object):
         # invoke ansible networking via ansible runner
         result = ansible_runner.run(playbook=playbook.serialize(),
                                     inventory=self.inventory.serialize(),
+                                    verbosity=True,
                                     settings={'pexpect_use_poll': False})
 
         # check for failure
@@ -217,3 +221,28 @@ class NetworkRunner(object):
         variables = {'port_name': port}
         variables.update(kwargs)
         return self.play(DELETE_PORT, hostname, variables)
+
+    def get_port_conf(self, hostname, port, format=False, **kwargs):
+        """Get port configuration.
+
+        :param hostname: The name of the host in Ansible inventory.
+        :param port: The port to get configuration.
+        :param format: Format the port configuration json
+        """
+        variables = {'port_name': port}
+        variables.update(kwargs)
+
+        # output the original port configuration json
+        if not format:
+            self.play(GET_PORT_CONF, hostname, variables)
+            return
+        # format the port configuration json
+        stdout_backup = sys.stdout
+        sys.stdout = helpers.FakeTextIO()
+        self.play(GET_PORT_CONF, hostname, variables)
+        formatter_stdout_data = helpers.format_port_config(
+            sys.stdout.buff(),
+            self.inventory.hosts[hostname].ansible_network_os
+        )
+        sys.stdout = stdout_backup
+        return print(formatter_stdout_data)

@@ -1,0 +1,9 @@
+---
+- name: "nos: reset interface to default (no switchport and shutdown)"
+  community.network.nos_config:
+    lines:
+      - "no switchport"
+      - "shutdown"
+    parents:
+      - "interface {{ port_name }}"
+  connection: network_cli

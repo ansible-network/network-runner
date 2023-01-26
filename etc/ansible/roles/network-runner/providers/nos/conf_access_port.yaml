@@ -6,6 +6,7 @@
       - "shutdown"
     parents:
       - "interface {{ port_name }}"
+    match: none
   connection: network_cli
 
 - name: "nos: enable switchport in access mode"
@@ -16,6 +17,7 @@
       - "no shutdown"
     parents:
       - "interface {{ port_name }}"
+    match: none
   connection: network_cli
 
 - name: "nos: enable rstp"
@@ -24,6 +26,7 @@
       - "no spanning-tree shutdown"
     parents:
       - "interface {{ port_name }}"
+    match: none
   connection: network_cli
   when: stp_edge
 
@@ -33,4 +36,5 @@
       - "switchport access vlan {{ _vlan_id }}"
     parents:
       - "interface {{ port_name }}"
+    match: none
   connection: network_cli

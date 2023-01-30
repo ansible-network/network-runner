@@ -5,4 +5,5 @@
       - "name {{ _vlan_name }}"
     parents:
       - "interface vlan {{ _vlan_id }}"
+    match: none
   connection: network_cli

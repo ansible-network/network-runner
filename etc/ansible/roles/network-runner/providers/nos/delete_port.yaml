@@ -6,4 +6,5 @@
       - "shutdown"
     parents:
       - "interface {{ port_name }}"
+    match: none
   connection: network_cli

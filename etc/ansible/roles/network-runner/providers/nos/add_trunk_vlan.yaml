@@ -5,4 +5,5 @@
       - "switchport trunk allowed vlan add {{ _vlan_id }}"
     parents:
       - "interface {{ port_name }}"
+    match: none
   connection: network_cli

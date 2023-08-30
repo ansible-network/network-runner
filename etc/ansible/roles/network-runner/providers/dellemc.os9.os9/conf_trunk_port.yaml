@@ -1,9 +1,27 @@
 ---
+- name: "dellemc.os9: get running config for interface"
+  dellemc.os9.os9_command:
+    commands: "show running-config interface {{ port_name }}"
+  register: port_description_cmd
+  connection: network_cli
+
+- name: "dellemc.os9: get description from running config"
+  ansible.builtin.set_fact:
+    port_description: "{{ port_description_cmd.stdout[0] | regex_search('(?<=description ).+?(?=[\\n\\r])') }}"
+
 - name: "dellemc.os9: reset interface to default"
   dellemc.os9.os9_config:
     lines:
       - "default interface {{ port_name }}"
   connection: network_cli
+
+- name: "dellemc.os9: reassign description"
+  dellemc.os9.os9_config:
+    lines:
+      - "description {{ port_description }}"
+    parents: ["interface {{ port_name }}"]
+  connection: network_cli
+  when: port_description != ""
 
 - name: "dellemc.os9: enable switchport, hybrid portmode, and jumbo frames"
   dellemc.os9.os9_config:
